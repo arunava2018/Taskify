@@ -14,15 +14,17 @@ import { Shield, Lock, Users, Mail } from "lucide-react"
 export function Privacy() {
   return (
     <Dialog>
+      {/* Trigger */}
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-all"
+          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors"
         >
           Privacy
         </Button>
       </DialogTrigger>
 
+      {/* Content */}
       <DialogContent className="sm:max-w-[560px] max-h-[80vh] p-0">
         {/* Header */}
         <DialogHeader className="px-6 pt-5 pb-4">
@@ -42,39 +44,43 @@ export function Privacy() {
         {/* Scrollable Content */}
         <ScrollArea className="px-6 py-4 max-h-[55vh]">
           <div className="space-y-5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+            {/* Intro */}
             <p>
               We collect minimal data to provide Taskify’s services, never sell your
               information, and give you control over your data.
             </p>
 
             {/* Section: What We Collect */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <Users className="h-4 w-4 text-[var(--primary)]" /> What We Collect
+                <Users className="h-4 w-4 text-[var(--primary)]" />
+                What We Collect
               </h3>
               <ul className="list-disc list-inside ml-1 mt-2 space-y-1">
                 <li>Account info: name, email (passwords encrypted)</li>
                 <li>Task data: tasks, notes, due dates, collaborators</li>
                 <li>Usage analytics: anonymized patterns only</li>
               </ul>
-            </div>
+            </section>
 
             {/* Section: Security */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <Lock className="h-4 w-4 text-[var(--destructive)]" /> Security
+                <Lock className="h-4 w-4 text-[var(--destructive)]" />
+                Security
               </h3>
               <ul className="list-disc list-inside ml-1 mt-2 space-y-1">
                 <li>Encryption in transit & at rest</li>
                 <li>Secure authentication & monitoring</li>
                 <li>Regular audits & backups</li>
               </ul>
-            </div>
+            </section>
 
             {/* Section: Contact */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[var(--primary)]" /> Contact
+                <Mail className="h-4 w-4 text-[var(--primary)]" />
+                Contact
               </h3>
               <p className="mt-2">
                 Questions? Email us at{" "}
@@ -85,7 +91,7 @@ export function Privacy() {
                   privacy@taskify.com
                 </a>
               </p>
-            </div>
+            </section>
           </div>
         </ScrollArea>
       </DialogContent>

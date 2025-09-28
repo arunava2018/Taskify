@@ -14,15 +14,17 @@ import { FileText, Shield, Mail } from "lucide-react"
 export function Terms() {
   return (
     <Dialog>
+      {/* Trigger */}
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-all"
+          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors"
         >
           Terms
         </Button>
       </DialogTrigger>
 
+      {/* Content */}
       <DialogContent className="sm:max-w-[560px] max-h-[80vh] p-0">
         {/* Header */}
         <DialogHeader className="px-6 pt-5 pb-4">
@@ -42,38 +44,42 @@ export function Terms() {
         {/* Scrollable Content */}
         <ScrollArea className="px-6 py-4 max-h-[55vh]">
           <div className="space-y-5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+            {/* Intro */}
             <p>
               By using Taskify, you agree to follow these terms. Please read them carefully.
             </p>
 
             {/* Section: Usage */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <Shield className="h-4 w-4 text-[var(--primary)]" /> Usage
+                <Shield className="h-4 w-4 text-[var(--primary)]" />
+                Usage
               </h3>
               <ul className="list-disc list-inside ml-1 mt-2 space-y-1">
                 <li>Use Taskify only for lawful purposes</li>
                 <li>Do not abuse or exploit the platform</li>
                 <li>Respect the rights of other users</li>
               </ul>
-            </div>
+            </section>
 
             {/* Section: Content */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <FileText className="h-4 w-4 text-[var(--primary)]" /> Content
+                <FileText className="h-4 w-4 text-[var(--primary)]" />
+                Content
               </h3>
               <ul className="list-disc list-inside ml-1 mt-2 space-y-1">
                 <li>You own the content you create</li>
                 <li>You grant Taskify permission to store & process it</li>
                 <li>We may remove content that violates these terms</li>
               </ul>
-            </div>
+            </section>
 
             {/* Section: Contact */}
-            <div>
+            <section>
               <h3 className="font-semibold text-[var(--foreground)] flex items-center gap-2">
-                <Mail className="h-4 w-4 text-[var(--destructive)]" /> Contact
+                <Mail className="h-4 w-4 text-[var(--destructive)]" />
+                Contact
               </h3>
               <p className="mt-2">
                 Questions? Email us at{" "}
@@ -84,7 +90,7 @@ export function Terms() {
                   support@taskify.com
                 </a>
               </p>
-            </div>
+            </section>
           </div>
         </ScrollArea>
       </DialogContent>

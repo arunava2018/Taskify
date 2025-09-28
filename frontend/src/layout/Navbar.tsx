@@ -1,25 +1,34 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { ListTodo, House, User, UserPlus, Menu, X, Moon, Sun } from "lucide-react"
-import type { FC } from "react"
+import { LinkButton } from "@/components/LinkButton"
+import {
+  ListTodo,
+  House,
+  User,
+  UserPlus,
+  Menu,
+  X,
+  Moon,
+  Sun,
+} from "lucide-react"
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/clerk-react"
 import { useState, useEffect } from "react"
+import type { FC } from "react"
 
 // Dark mode hook
 function useDarkMode() {
   const [isDark, setIsDark] = useState(false)
-
   useEffect(() => {
-    const saved = localStorage.getItem("theme")
-    if (saved) {
-      setIsDark(saved === "dark")
-      document.documentElement.classList.toggle("dark", saved === "dark")
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      setIsDark(prefersDark)
-      document.documentElement.classList.toggle("dark", prefersDark)
-    }
+    const savedTheme = localStorage.getItem("theme")
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    const initialMode = savedTheme ? savedTheme === "dark" : prefersDark
+    setIsDark(initialMode)
+    document.documentElement.classList.toggle("dark", initialMode)
   }, [])
-
   const toggle = () => {
     const newMode = !isDark
     setIsDark(newMode)
@@ -43,7 +52,7 @@ const Navbar: FC = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-colors duration-300 ${
+      className={`sticky top-0 z-50 transition-colors border-b-2 duration-300 ${
         scrolled
           ? "bg-[var(--background)]/80 backdrop-blur border-b border-[var(--border)] shadow-sm"
           : "bg-transparent"
@@ -61,32 +70,40 @@ const Navbar: FC = () => {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-2">
           <Button variant="ghost" asChild>
-            <Link to="/" className="flex items-center gap-2">
+            <LinkButton to="/" className="flex items-center gap-2">
               <House className="h-4 w-4" />
               <span>Home</span>
-            </Link>
+            </LinkButton>
           </Button>
 
           <Button variant="ghost" asChild>
             <a href="#features">Features</a>
           </Button>
 
-          <Button variant="ghost" asChild>
-            <a href="#" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span>Login</span>
-            </a>
-          </Button>
+          {/* Signed Out (Login & Sign Up) */}
+          <SignedOut>
+            <Button variant="ghost" asChild>
+              <LinkButton to="/sign-in" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Login</span>
+              </LinkButton>
+            </Button>
 
-          <Button
-            asChild
-            className="ml-2 flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--ring)] text-white"
-          >
-            <a href="#">
-              <UserPlus className="h-4 w-4" />
-              <span>Sign Up</span>
-            </a>
-          </Button>
+            <Button
+              asChild
+              className="ml-2 flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--ring)] text-white"
+            >
+              <LinkButton to="/sign-up">
+                <UserPlus className="h-4 w-4" />
+                <span>Sign Up</span>
+              </LinkButton>
+            </Button>
+          </SignedOut>
+
+          {/* Signed In (User Avatar / Menu) */}
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
 
           {/* Dark Mode Toggle */}
           <button
@@ -156,23 +173,34 @@ const Navbar: FC = () => {
                 Features
               </a>
 
-              <a
-                href="#"
-                className="flex items-center gap-2 py-2 text-[var(--foreground)] hover:text-[var(--primary)]"
-                onClick={() => setMobileOpen(false)}
-              >
-                <User className="h-4 w-4" />
-                <span>Login</span>
-              </a>
+              {/* Signed Out Links */}
+              <SignedOut>
+                <Link
+                  to="/sign-in"
+                  className="flex items-center gap-2 py-2 text-[var(--foreground)] hover:text-[var(--primary)]"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span>Login</span>
+                </Link>
 
-              <a
-                href="#"
-                className="flex items-center gap-2 py-2 bg-[var(--primary)] text-white rounded-lg px-3 hover:bg-[var(--ring)] transition-colors"
-                onClick={() => setMobileOpen(false)}
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>Sign Up</span>
-              </a>
+                <Link
+                  to="/sign-up"
+                  className="flex items-center gap-2 py-2 bg-[var(--primary)] text-white rounded-lg px-3 hover:bg-[var(--ring)] transition-colors"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Sign Up</span>
+                </Link>
+              </SignedOut>
+
+              {/* Signed In User Menu */}
+              <SignedIn>
+                <div className="py-2 flex items-center gap-2 text-[var(--foreground)]">
+                  <UserButton afterSignOutUrl="/" />
+                  <span className="text-[var(--foreground)] hover:text-[var(--primary)]">Profile</span>
+                </div>
+              </SignedIn>
 
               {/* Dark Mode Toggle */}
               <button
