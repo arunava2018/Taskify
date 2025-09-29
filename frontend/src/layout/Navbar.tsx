@@ -18,31 +18,14 @@ import {
 } from "@clerk/clerk-react"
 import { useState, useEffect } from "react"
 import type { FC } from "react"
-
-// Dark mode hook
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false)
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme")
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-    const initialMode = savedTheme ? savedTheme === "dark" : prefersDark
-    setIsDark(initialMode)
-    document.documentElement.classList.toggle("dark", initialMode)
-  }, [])
-  const toggle = () => {
-    const newMode = !isDark
-    setIsDark(newMode)
-    document.documentElement.classList.toggle("dark", newMode)
-    localStorage.setItem("theme", newMode ? "dark" : "light")
-  }
-
-  return { isDark, toggle }
-}
+import { useTheme } from "@/theme/Themeprovides" 
 
 const Navbar: FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { isDark, toggle } = useDarkMode()
+  const { theme, setTheme } = useTheme()
+
+  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark")
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -107,11 +90,11 @@ const Navbar: FC = () => {
 
           {/* Dark Mode Toggle */}
           <button
-            onClick={toggle}
+            onClick={toggleTheme}
             className="ml-3 p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
             aria-label="Toggle theme"
           >
-            {isDark ? (
+            {theme === "dark" ? (
               <Sun className="h-5 w-5 text-yellow-400" />
             ) : (
               <Moon className="h-5 w-5 text-blue-600" />
@@ -198,16 +181,18 @@ const Navbar: FC = () => {
               <SignedIn>
                 <div className="py-2 flex items-center gap-2 text-[var(--foreground)]">
                   <UserButton afterSignOutUrl="/" />
-                  <span className="text-[var(--foreground)] hover:text-[var(--primary)]">Profile</span>
+                  <span className="text-[var(--foreground)] hover:text-[var(--primary)]">
+                    Profile
+                  </span>
                 </div>
               </SignedIn>
 
               {/* Dark Mode Toggle */}
               <button
-                onClick={toggle}
+                onClick={toggleTheme}
                 className="mt-4 flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-[var(--muted)] transition-colors"
               >
-                {isDark ? (
+                {theme === "dark" ? (
                   <>
                     <Sun className="h-5 w-5 text-yellow-400" />
                     <span>Light Mode</span>
