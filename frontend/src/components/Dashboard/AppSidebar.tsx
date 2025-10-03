@@ -68,7 +68,7 @@ function AppSidebar({
   return (
     <aside
       className={`fixed top-16 left-0 h-full md:h-[calc(100vh-64px)] border-r bg-background flex flex-col transition-all duration-300 ${
-        collapsed ? "w-20" : "w-64"
+        collapsed ? "w-20 p-3" : "w-64"
       }`}
     >
       {/* Header: User profile + Collapse toggle */}
@@ -107,10 +107,9 @@ function AppSidebar({
       {/* Scrollable middle section */}
       <div className="flex-1 overflow-y-auto">
         {/* Create Todo Button */}
-        <div className="p-4">
-          <Button onClick={onCreateTodo} className="w-full gap-2 h-10">
-            <Plus className="w-4 h-4" />
-            {!collapsed && "Create Todo"}
+        <div className="p-4 ">
+          <Button onClick={onCreateTodo} className="w-full gap-2  text-white">
+            {collapsed ? <Plus className="w-4 h-4" /> : <><Plus className="w-4 h-4" /><span>Create Todo</span></>}
           </Button>
         </div>
 

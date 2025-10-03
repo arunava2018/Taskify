@@ -173,7 +173,7 @@ function Dashboard() {
               </div>
             </div>
             {(activeView === "personal" || activeView === "shared") && (
-              <Button onClick={handleCreateTodo} className="gap-2 text-sm md:text-base">
+              <Button onClick={handleCreateTodo} className="gap-2 text-sm md:text-base text-white">
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">New Todo</span>
               </Button>
