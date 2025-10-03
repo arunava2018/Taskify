@@ -45,7 +45,7 @@ const Navbar: FC = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-[var(--primary)] hover:bg-[var(--ring)] transition-colors">
-            <ListTodo className="h-5 w-5 text-[var(--primary-foreground)]" />
+            <ListTodo className="h-5 w-5 text-white" />
           </div>
           <h1 className="text-xl font-bold text-[var(--foreground)]">Taskify</h1>
         </Link>

@@ -1,8 +1,18 @@
 import type { FC } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle2, Users, Globe } from "lucide-react"
-
+import { useUser } from "@clerk/clerk-react"
 const HeroSection: FC = () => {
+  const { user } = useUser()
+  const handleClick = () => {
+    if (user) {
+      // Redirect to dashboard if user is logged in
+      window.location.href = "/dashboard"
+    } else {
+      // Redirect to sign-in page if user is not logged in
+      window.location.href = "/sign-in"
+    } 
+  }
   return (
     <main className="max-w-6xl mx-auto px-6 py-14 text-center">
       {/* Trust indicators */}
@@ -47,6 +57,7 @@ const HeroSection: FC = () => {
           bg-[var(--primary)] text-white 
           hover:bg-[var(--ring)] shadow-lg hover:shadow-xl 
           transform hover:scale-105 transition-all duration-200"
+          onClick={handleClick}
         >
           Start Free Today
           <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />

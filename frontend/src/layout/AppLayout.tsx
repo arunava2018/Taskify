@@ -1,18 +1,21 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import Navbar from "./Navbar"
-import Footer from "./Footer"
-
 const AppLayout: React.FC = () => {
+  const { pathname } = useLocation()
+  const isDashboard = pathname.startsWith("/dashboard")
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header always visible */}
+      {/* Navbar always visible */}
       <Navbar />
-      {/* Page content */}
-      <main className="flex-grow container m-auto">
+
+      {/* Page Content */}
+      <main className={`flex-grow ${isDashboard ? "" : "container m-auto"}`}>
         <Outlet />
       </main>
+
       {/* Footer */}
-      <Footer />
+      {/* <Footer /> */}
     </div>
   )
 }

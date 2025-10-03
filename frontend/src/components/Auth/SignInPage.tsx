@@ -4,7 +4,8 @@ import { Navigate } from "react-router-dom"
 export default function SignInPage() {
   const { user } = useUser()
   if(user){
-    return <Navigate to="/" replace /> 
+    // console.log(user);
+    return <Navigate to="/dashboard" replace /> 
   }
   return (
     <div className="flex items-center justify-center h-screen">
