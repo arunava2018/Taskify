@@ -11,8 +11,8 @@ const TodoSchema = new Schema(
       default: "medium",
     },
     due_date: { type: Date },
-    created_by: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    updated_by: { type: Schema.Types.ObjectId, ref: "User" },
+    created_by: { type: String, ref: "User", required: true },  // Clerk ID
+    updated_by: { type: String, ref: "User" },
     task_id: { type: Schema.Types.ObjectId, ref: "Task", required: true },
   },
   { timestamps: true }

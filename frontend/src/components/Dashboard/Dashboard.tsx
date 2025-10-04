@@ -7,6 +7,7 @@ import Analytics from "./Analytics";
 import CreateTaskModal from "./CreateTodoModal";
 import { Button } from "@/components/ui/button";
 import { Plus, Menu } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
 
 type ViewType = "personal" | "shared" | "calendar" | "analytics";
 
@@ -31,6 +32,7 @@ interface SharedTask {
 }
 
 function Dashboard() {
+  const { getToken, isSignedIn } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>("personal");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,10 +43,18 @@ function Dashboard() {
     overdue: 0,
     completed: 0,
   });
-
+  
   const [personalTodos, setPersonalTodos] = useState<PersonalTask[]>([]);
   const [sharedTodos, setSharedTodos] = useState<SharedTask[]>([]);
-
+  useEffect(() => {
+    const fetchToken = async () => {
+      if (isSignedIn) {
+        const token = await getToken({ template: "postman-test" });
+        console.log("Clerk JWT:", token);
+      }
+    };
+    fetchToken();
+  }, [getToken, isSignedIn]);
   /** -------------------------
    * Fetch Data from backend
    * ------------------------- */

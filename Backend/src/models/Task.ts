@@ -16,10 +16,10 @@ const TaskSchema = new Schema(
       default: "pending",
     },
     due_date: { type: Date },
-    created_by: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    updated_by: { type: Schema.Types.ObjectId, ref: "User" },
-    unique_code: { type: String, unique: true },
-    collaborators: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    created_by: { type: String, ref: "User", required: true },  // Clerk ID
+    updated_by: { type: String, ref: "User" },
+    unique_code: { type: String, unique: true, sparse: true },
+    collaborators: [{ type: String, ref: "User" }],             // Clerk IDs
   },
   { timestamps: true }
 );
