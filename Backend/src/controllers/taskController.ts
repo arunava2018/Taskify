@@ -313,3 +313,33 @@ export const acceptTaskInvitation = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to accept invitation" });
   }
 };
+/**
+ * Mark a task as completed
+ * - Only owner or collaborator can mark it completed
+ */
+export const completeTask = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { taskId } = req.params;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const isOwner = task.created_by === userId;
+    const isCollaborator = task.collaborators.includes(userId);
+
+    if (!(isOwner || isCollaborator)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    task.status = "completed";
+    await task.save();
+
+    res.json({ message: "Task marked as completed", task });
+  } catch (error) {
+    console.error("Error marking task completed:", error);
+    res.status(500).json({ error: "Failed to mark task as completed" });
+  }
+}; 

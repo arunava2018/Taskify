@@ -61,14 +61,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          <button
+          {/* <button
             onClick={() =>
               handleUpdateTask(selectedTask._id, { title: "Updated title" })
             }
             className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
           >
             <Edit className="w-4 h-4" />
-          </button>
+          </button> */}
           <button
             onClick={() => handleDeleteTask(selectedTask._id)}
             className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"

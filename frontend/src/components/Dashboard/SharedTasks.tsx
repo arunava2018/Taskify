@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import {
-  Loader2,
-  ClipboardList,
-  Menu,
-  ListTodo,
-  X,
-} from "lucide-react";
+import { Loader2, ClipboardList, Menu, ListTodo, X } from "lucide-react";
 import { Toaster } from "sonner";
 import TaskDetails from "./TaskDetails";
 import type { Task } from "./PersonalTasks";
+import {
+  PRIORITY_COLORS,
+  STATUS_COLORS,
+  formatDate,
+  getProgressColor,
+} from "../../constants";
 
 export interface SharedTask extends Task {
   collaborators: string[];
-  ownerName?: string; // store owner's first name here
-  createdBy?: string; // make sure your backend sends this
+  ownerName?: string;
+  createdBy?: string;
 }
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
@@ -28,7 +28,14 @@ function SharedTodos() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ✅ Fetch shared tasks + todos
+  // Same progress calc as PersonalTodos
+  const getTaskProgress = (task: SharedTask) => {
+    if (!task.todos || task.todos.length === 0) return 0;
+    const completed = task.todos.filter((t) => t.is_completed).length;
+    return Math.round((completed / task.todos.length) * 100);
+  };
+
+  // Fetch shared tasks + todos
   useEffect(() => {
     const fetchSharedTasksAndTodos = async () => {
       try {
@@ -58,7 +65,8 @@ function SharedTodos() {
             try {
               if (task.created_by) {
                 const userRes = await axios.get(
-                  `${BASEURL}/api/users/${task.created_by}`
+                  `${BASEURL}/api/users/${task.created_by}`,
+                  { headers: { Authorization: `Bearer ${token}` } }
                 );
                 ownerName = userRes.data.user_name?.split(" ")[0] || "Unknown";
               }
@@ -91,40 +99,49 @@ function SharedTodos() {
     fetchSharedTasksAndTodos();
   }, [getToken]);
 
-  // ✅ Toggle todo completion
+  // Toggle todo completion (mirror PersonalTodos: use backend response to set status)
   const handleToggleTodo = async (taskId: string, todoId: string) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task._id === taskId
-          ? {
-              ...task,
-              todos: task.todos?.map((t) =>
-                t._id === todoId ? { ...t, is_completed: !t.is_completed } : t
-              ),
-            }
-          : task
-      )
-    );
-    if (selectedTask?._id === taskId) {
-      setSelectedTask((prev) =>
-        prev
-          ? {
-              ...prev,
-              todos: prev.todos?.map((t) =>
-                t._id === todoId ? { ...t, is_completed: !t.is_completed } : t
-              ),
-            }
-          : prev
-      );
-    }
-
     try {
       const token = await getToken({ template: "postman-test" });
-      await axios.patch(
+      const res = await axios.patch(
         `${BASEURL}/api/todos/${todoId}/toggle`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      // Expecting controller to return: { success, data: updatedTodo, taskStatus }
+      const updatedTodo = res?.data?.data;
+      const taskStatus: SharedTask["status"] = res?.data?.taskStatus || "pending";
+
+      if (!updatedTodo) return;
+
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId
+            ? {
+                ...t,
+                status: taskStatus,
+                todos: t.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: taskStatus,
+                todos: prev.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : prev
+        );
+      }
     } catch (err) {
       console.error("Failed to toggle todo", err);
     }
@@ -145,31 +162,6 @@ function SharedTodos() {
       );
     }
   };
-
-  //  Styling helpers
-  const getPriorityColor = (priority: string) =>
-    ({
-      high: "bg-destructive/10 text-destructive border-destructive/20",
-      medium:
-        "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
-      low: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
-    }[priority] || "bg-muted text-muted-foreground border-border");
-
-  const getStatusColor = (status: string) =>
-    ({
-      completed:
-        "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
-      "in-progress": "bg-primary/10 text-primary border-primary/20",
-      pending:
-        "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
-    }[status] || "bg-muted text-muted-foreground border-border");
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
 
   if (loading)
     return (
@@ -219,48 +211,70 @@ function SharedTodos() {
                   </p>
                 </div>
               ) : (
-                tasks.map((task) => (
-                  <div
-                    key={task._id}
-                    className={`group p-3 lg:p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
-                      selectedTask?._id === task._id
-                        ? "border-primary bg-primary/5 shadow-sm"
-                        : "border-border bg-background hover:border-border/60"
-                    }`}
-                    onClick={() => {
-                      setSelectedTask(task);
-                      setSidebarOpen(false);
-                    }}
-                  >
-                    <div className="cursor-pointer">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-sm lg:text-base font-semibold text-card-foreground truncate flex-1 mr-2">
-                          {task.title}
-                        </h3>
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-xs font-medium border ${getStatusColor(
-                            task.status
-                          )}`}
-                        >
-                          {task.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {task.created_by === user?.id
-                          ? "Created by You"
-                          : `Created by ${task.ownerName}`}{" "}
-                        <br />
-                        Last updated: {formatDate(task.updatedAt)}
-                        <br />
-                        {task.collaborators.length > 0 && (
-                          <span>
-                            Collaborators: {task.collaborators.length}
+                tasks.map((task) => {
+                  const progress = getTaskProgress(task);
+                  return (
+                    <div
+                      key={task._id}
+                      className={`group p-3 lg:p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
+                        selectedTask?._id === task._id
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border bg-background hover:border-border/60"
+                      }`}
+                      onClick={() => {
+                        setSelectedTask(task);
+                        setSidebarOpen(false);
+                      }}
+                    >
+                      <div className="cursor-pointer">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-sm lg:text-base font-semibold text-card-foreground truncate flex-1 mr-2">
+                            {task.title}
+                          </h3>
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-xs font-medium border ${STATUS_COLORS[task.status]}`}
+                          >
+                            {task.status}
                           </span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        {task.todos && task.todos.length > 0 && (
+                          <div className="mt-3">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                              <span>{progress}%</span>
+                              <span>
+                                {
+                                  task.todos.filter((t) => t.is_completed).length
+                                }/{task.todos.length} done
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-2 transition-all duration-300 ${getProgressColor(
+                                  progress
+                                )}`}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                          </div>
                         )}
-                      </p>
+
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {task.created_by === user?.id
+                            ? "Created by You"
+                            : `Created by ${task.ownerName}`}{" "}
+                          <br />
+                          Last updated: {formatDate(task.updatedAt)}
+                          <br />
+                          {task.collaborators.length > 0 && (
+                            <span>Collaborators: {task.collaborators.length}</span>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -273,7 +287,9 @@ function SharedTodos() {
               handleDeleteTask={() => {}} // shared tasks: no delete
               handleUpdateTask={() => {}} // shared tasks: no update
               formatDate={formatDate}
-              getPriorityColor={getPriorityColor}
+              getPriorityColor={(priority: string) =>
+                PRIORITY_COLORS[priority] || "bg-muted"
+              }
               onTodoAdded={(newTodo) =>
                 selectedTask && handleTodoAdded(selectedTask._id, newTodo)
               }

@@ -11,6 +11,7 @@ import {
   enableShareTask,   
   disableShareTask,
   acceptTaskInvitation,
+  completeTask, 
 } from "../controllers/taskController";
 
 const router = express.Router();
@@ -83,5 +84,12 @@ router.post("/:taskId/share/disable", authMiddleware, disableShareTask);
  * - Adds user as collaborator
  */
 router.post("/:taskId/accept", authMiddleware, acceptTaskInvitation);
+
+/**
+ * PATCH /api/tasks/:taskId/complete
+ * Mark a task as completed
+ * - Allowed for owner and collaborators
+ */
+router.patch("/:taskId/complete", authMiddleware, completeTask);
 
 export default router;

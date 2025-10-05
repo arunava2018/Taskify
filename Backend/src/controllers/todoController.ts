@@ -120,21 +120,42 @@ export const toggleTodoCompletion = async (req: Request, res: Response) => {
     const userId = (req as any).userId;
 
     const todo = await Todo.findById(todoId);
-    if (!todo) return res.status(404).json({ success: false, message: "Todo not found" });
+    if (!todo)
+      return res.status(404).json({ success: false, message: "Todo not found" });
 
     const task = await Task.findById(todo.task_id);
-    if (!task) return res.status(404).json({ success: false, message: "Associated task not found" });
+    if (!task)
+      return res.status(404).json({ success: false, message: "Associated task not found" });
 
+    // Authorization check
     if (task.created_by !== userId && !task.collaborators.includes(userId)) {
-      return res.status(403).json({ success: false, message: "Access denied" });
+      return res
+        .status(403)
+        .json({ success: false, message: "Access denied" });
     }
 
+    // Toggle todo
     todo.is_completed = !todo.is_completed;
     todo.updated_by = userId;
-
     const updatedTodo = await todo.save();
-    res.json({ success: true, data: updatedTodo });
+
+    //  Recalculate task status based on todos
+    const total = await Todo.countDocuments({ task_id: task._id });
+    const done = await Todo.countDocuments({
+      task_id: task._id,
+      is_completed: true,
+    });
+
+    let newStatus: "pending" | "in-progress" | "completed" = "pending";
+    if (done === total && total > 0) newStatus = "completed";
+    else if (done > 0) newStatus = "in-progress";
+
+    task.status = newStatus;
+    await task.save();
+
+    res.json({ success: true, data: updatedTodo, taskStatus: task.status });
   } catch (error) {
+    console.error("Error toggling todo:", error);
     res.status(500).json({ success: false, message: "Server error", error });
   }
 };

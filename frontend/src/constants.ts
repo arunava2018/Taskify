@@ -167,3 +167,36 @@ export const FAQS = [
       "Yes, you can export your task data anytime. Taskify supports various export formats including CSV and JSON, making it easy to backup your data or migrate to other tools if needed. Your data belongs to you.",
   },
 ]
+// constants.ts
+
+// Priority colors
+export const PRIORITY_COLORS: Record<string, string> = {
+  high: "bg-destructive/10 text-destructive border-destructive/20",
+  medium:
+    "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
+  low: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
+};
+
+// Status colors
+export const STATUS_COLORS: Record<string, string> = {
+  completed:
+    "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
+  "in-progress": "bg-primary/10 text-primary border-primary/20",
+  pending:
+    "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
+};
+
+// Progress bar color helper
+export const getProgressColor = (percent: number): string => {
+  if (percent >= 80) return "bg-green-500";
+  if (percent >= 50) return "bg-yellow-500";
+  return "bg-red-500";
+};
+
+// Date formatter
+export const formatDate = (dateString: string): string =>
+  new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });

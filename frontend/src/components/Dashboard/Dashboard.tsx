@@ -7,10 +7,20 @@ import CalendarView from "./CalendarView";
 import Analytics from "./Analytics";
 import CreateTaskModal from "./CreateTaskModal";
 import { Button } from "@/components/ui/button";
+import HighPriority from "./HighPriority";
+import MediumPriority from "./MediumPriority";
+import LowPriority from "./LowPriority";
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
-type ViewType = "personal" | "shared" | "calendar" | "analytics";
+type ViewType =
+  | "personal"
+  | "shared"
+  | "calendar"
+  | "analytics"
+  | "High Priority"
+  | "Medium Priority"
+  | "Low Priority";
 
 interface TodoStats {
   personal: number;
@@ -46,10 +56,14 @@ function Dashboard() {
         return <PersonalTodos />;
       case "shared":
         return <SharedTodos />;
-      case "calendar":
-        return <CalendarView />;
       case "analytics":
         return <Analytics todoStats={todoStats} />;
+      case "High Priority":
+        return <HighPriority />;
+      case "Medium Priority":
+        return <MediumPriority />;
+      case "Low Priority":
+        return <LowPriority />;
       default:
         return <PersonalTodos />;
     }
@@ -79,6 +93,21 @@ function Dashboard() {
         return {
           title: "Analytics Dashboard",
           description: "Track your productivity metrics",
+        };
+      case "High Priority":
+        return {
+          title: "High Priority Tasks",
+          description: "View and manage your high priority tasks",
+        };
+      case "Medium Priority":
+        return {
+          title: "Medium Priority Tasks",
+          description: "View and manage your medium priority tasks",
+        };
+      case "Low Priority":
+        return {
+          title: "Low Priority Tasks",
+          description: "View and manage your low priority tasks",
         };
       default:
         return {

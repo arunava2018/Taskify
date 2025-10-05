@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
-import {
-  Loader2,
-  ClipboardList,
-  Menu,
-  ListTodo,
-  X,
-  Copy,
-} from "lucide-react";
+import { Loader2, ClipboardList, Menu, X } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import TaskDetails from "./TaskDetails";
 import {
@@ -45,7 +38,7 @@ export interface Task {
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
-function PersonalTodos() {
+function MediumPriority() {
   const { getToken } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -55,33 +48,43 @@ function PersonalTodos() {
   >("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // --- Helpers ---
+  // ✅ Helper for task progress %
   const getTaskProgress = (task: Task) => {
     if (!task.todos || task.todos.length === 0) return 0;
     const completed = task.todos.filter((t) => t.is_completed).length;
     return Math.round((completed / task.todos.length) * 100);
   };
 
-  // --- Fetch tasks + todos ---
+  // ✅ Fetch both personal + shared MEDIUM priority tasks
   useEffect(() => {
-    const fetchTasksAndTodos = async () => {
+    const fetchMediumPriorityTasks = async () => {
       try {
         const token = await getToken({ template: "postman-test" });
-        const taskRes = await axios.get(`${BASEURL}/api/tasks/personal`, {
+
+        const personalRes = await axios.get(`${BASEURL}/api/tasks/personal`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        const personalMedium = personalRes.data.filter(
+          (t: Task) => t.priority === "medium"
+        );
 
-        const taskList: Task[] = taskRes.data || [];
+        const sharedRes = await axios.get(`${BASEURL}/api/tasks/shared`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const sharedMedium = sharedRes.data.filter(
+          (t: Task) => t.priority === "medium"
+        );
+
+        const combined = [...personalMedium, ...sharedMedium];
 
         const tasksWithTodos = await Promise.all(
-          taskList.map(async (task) => {
+          combined.map(async (task) => {
             try {
               const todoRes = await axios.get(
                 `${BASEURL}/api/todos/${task._id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
-              const todos = todoRes.data.data || [];
-              return { ...task, todos };
+              return { ...task, todos: todoRes.data.data || [] };
             } catch {
               return { ...task, todos: [] };
             }
@@ -93,15 +96,15 @@ function PersonalTodos() {
           setSelectedTask(tasksWithTodos[0]);
         }
       } catch (err) {
-        console.error("Failed to fetch tasks", err);
+        console.error("Failed to fetch medium priority tasks", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchTasksAndTodos();
+    fetchMediumPriorityTasks();
   }, [getToken]);
 
-  // --- API actions ---
+  // ✅ Toggle todo completion
   const handleToggleTodo = async (taskId: string, todoId: string) => {
     try {
       const token = await getToken({ template: "postman-test" });
@@ -111,7 +114,10 @@ function PersonalTodos() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { data: updatedTodo, taskStatus } = res.data;
+      const updatedTodo = res?.data?.data;
+      const taskStatus: Task["status"] = res?.data?.taskStatus || "pending";
+
+      if (!updatedTodo) return;
 
       setTasks((prev) =>
         prev.map((t) =>
@@ -166,6 +172,7 @@ function PersonalTodos() {
       const res = await axios.put(`${BASEURL}/api/tasks/${taskId}`, updates, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setTasks((prev) =>
         prev.map((t) => (t._id === taskId ? { ...t, ...res.data } : t))
       );
@@ -194,54 +201,6 @@ function PersonalTodos() {
     }
   };
 
-  const handleToggleShare = async (task: Task) => {
-    try {
-      const token = await getToken({ template: "postman-test" });
-      if (!task.is_shareable) {
-        const res = await axios.post(
-          `${BASEURL}/api/tasks/${task._id}/share/enable`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const updatedTask = {
-          ...task,
-          ...res.data.task,
-          shareableLink: res.data.shareableLink,
-        };
-        setTasks((prev) =>
-          prev.map((t) => (t._id === task._id ? updatedTask : t))
-        );
-        if (selectedTask?._id === task._id) setSelectedTask(updatedTask);
-        toast.success("Collaboration enabled!");
-      } else {
-        await axios.post(
-          `${BASEURL}/api/tasks/${task._id}/share/disable`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const updatedTask = {
-          ...task,
-          is_shareable: false,
-          unique_code: null,
-          shareableLink: undefined,
-        };
-        setTasks((prev) =>
-          prev.map((t) => (t._id === task._id ? updatedTask : t))
-        );
-        if (selectedTask?._id === task._id) setSelectedTask(updatedTask);
-        toast.success("Collaboration disabled!");
-      }
-    } catch (err) {
-      console.error("Failed to toggle share", err);
-      toast.error("Failed to toggle share");
-    }
-  };
-
-  const handleCopyLink = (link: string) => {
-    navigator.clipboard.writeText(link);
-    toast.success("Link copied to clipboard!");
-  };
-
   const filteredTasks = tasks.filter(
     (task) => filter === "all" || task.status === filter
   );
@@ -251,7 +210,7 @@ function PersonalTodos() {
       <div className="flex flex-col items-center justify-center h-96 bg-gradient-to-br from-background via-muted/20 to-primary/5 rounded-lg border border-border">
         <Loader2 className="animate-spin w-10 h-10 text-primary mb-3" />
         <p className="text-muted-foreground font-medium">
-          Loading your workspace...
+          Loading medium priority tasks...
         </p>
       </div>
     );
@@ -262,7 +221,10 @@ function PersonalTodos() {
       <div className="max-w-7xl mx-auto">
         {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between mb-4 p-4 bg-card rounded-lg border border-border">
-          <h1 className="text-lg font-bold text-foreground">Personal Tasks</h1>
+          <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></span>
+            Medium Priority
+          </h1>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-accent rounded-lg transition-colors"
@@ -280,8 +242,8 @@ function PersonalTodos() {
           >
             <div className="flex items-center mb-6">
               <h2 className="flex items-center gap-2 font-bold text-base lg:text-md text-card-foreground">
-                <ListTodo className="w-5 h-5 text-primary" />
-                Tasks ({filteredTasks.length})
+                <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                Medium Priority ({filteredTasks.length})
               </h2>
             </div>
 
@@ -289,7 +251,9 @@ function PersonalTodos() {
               {filteredTasks.length === 0 ? (
                 <div className="text-center py-12">
                   <ClipboardList className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No tasks found</p>
+                  <p className="text-sm text-muted-foreground">
+                    No medium priority tasks
+                  </p>
                 </div>
               ) : (
                 filteredTasks.map((task) => {
@@ -299,7 +263,7 @@ function PersonalTodos() {
                       key={task._id}
                       className={`group p-3 lg:p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
                         selectedTask?._id === task._id
-                          ? "border-primary bg-primary/5 shadow-sm"
+                          ? "border-yellow-500 bg-yellow-500/5 shadow-sm"
                           : "border-border bg-background hover:border-border/60"
                       }`}
                       onClick={() => {
@@ -318,53 +282,41 @@ function PersonalTodos() {
                             {task.status}
                           </span>
                         </div>
-                      </div>
 
-                      {/* Progress Bar */}
-                      {task.todos && task.todos.length > 0 && (
-                        <div className="mt-3">
-                          <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                            <span>{progress}%</span>
-                            <span>
-                              {
-                                task.todos.filter((t) => t.is_completed).length
-                              }/{task.todos.length} done
-                            </span>
+                        {/* ✅ Progress Bar */}
+                        {task.todos && task.todos.length > 0 && (
+                          <div className="mt-3">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                              <span>{progress}%</span>
+                              <span>
+                                {
+                                  task.todos.filter((t) => t.is_completed).length
+                                }/{task.todos.length} done
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-2 transition-all duration-300 ${getProgressColor(
+                                  progress
+                                )}`}
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
                           </div>
-                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-2 transition-all duration-300 ${getProgressColor(
-                                progress
-                              )}`}
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Share Controls */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() => handleToggleShare(task)}
-                          className={`px-2 py-1 text-xs rounded-md border transition-colors mt-1 ${
-                            task.is_shareable
-                              ? "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20"
-                              : "bg-muted text-muted-foreground hover:bg-accent"
-                          }`}
-                        >
-                          {task.is_shareable
-                            ? "Disable Collaboration"
-                            : "Enable Collaboration"}
-                        </button>
-
-                        {task.is_shareable && task.shareableLink && (
-                          <button
-                            onClick={() => handleCopyLink(task.shareableLink!)}
-                            className="p-1.5 border rounded-md hover:bg-accent transition-colors"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
                         )}
+
+                        {/* Personal / Shared marker */}
+                        <div className="flex items-center gap-2 mt-2">
+                          {!task.is_shareable ? (
+                            <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              Personal
+                            </span>
+                          ) : (
+                            <span className="text-xs px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                              Shared
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -395,4 +347,4 @@ function PersonalTodos() {
   );
 }
 
-export default PersonalTodos;
+export default MediumPriority;
