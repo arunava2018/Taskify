@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { Menu, Plus } from "lucide-react";
 import AppSidebar from "./AppSidebar";
 import PersonalTodos from "./PersonalTasks";
 import SharedTodos from "./SharedTasks";
 import CalendarView from "./CalendarView";
 import Analytics from "./Analytics";
-import CreateTaskModal from "./CreateTodoModal";
+import CreateTaskModal from "./CreateTaskModal";
 import { Button } from "@/components/ui/button";
-import { Plus, Menu } from "lucide-react";
-import { useAuth } from "@clerk/clerk-react";
+
+const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
 type ViewType = "personal" | "shared" | "calendar" | "analytics";
 
@@ -18,123 +19,72 @@ interface TodoStats {
   completed: number;
 }
 
-interface PersonalTask {
-  id: string;
-  title: string;
-  status: "pending" | "completed";
-}
-
-interface SharedTask {
-  id: string;
-  title: string;
-  owner: string;
-  status: "pending" | "completed";
-}
-
 function Dashboard() {
-  const { getToken, isSignedIn } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>("personal");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [todoStats, setTodoStats] = useState<TodoStats>({
     personal: 0,
     shared: 0,
     overdue: 0,
     completed: 0,
   });
-  
-  const [personalTodos, setPersonalTodos] = useState<PersonalTask[]>([]);
-  const [sharedTodos, setSharedTodos] = useState<SharedTask[]>([]);
-  useEffect(() => {
-    const fetchToken = async () => {
-      if (isSignedIn) {
-        const token = await getToken({ template: "postman-test" });
-        console.log("Clerk JWT:", token);
-      }
-    };
-    fetchToken();
-  }, [getToken, isSignedIn]);
-  /** -------------------------
-   * Fetch Data from backend
-   * ------------------------- */
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const personalTasks = await fetch("/api/tasks/personal");
-        const sharedTasks = await fetch("/api/sharedtasks");
-        const stats = await fetch("/api/tasks/stats");
-        const data = await stats.json();
-        if (personalTasks.ok) {
-          const personalData = await personalTasks.json();
-          setPersonalTodos(personalData.tasks || []);
-        }
-        if (sharedTasks.ok) {
-          const sharedData = await sharedTasks.json();
-          setSharedTodos(sharedData.tasks || []);
-        }
-        setTodoStats(data.stats || { personal: 0, shared: 0, overdue: 0, completed: 0 });
-      } catch (err) {
-        console.error("Failed to fetch tasks", err);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   /** -------------------------
-   * Handlers
+   * Handle Create Task Modal
    * ------------------------- */
-  const handleCreateTodo = useCallback(() => {
+  const handleCreateTask = useCallback(() => {
     setIsCreateModalOpen(true);
   }, []);
 
-  const handleTogglePersonal = (id: string) => {
-    setPersonalTodos((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, status: t.status === "completed" ? "pending" : "completed" } : t
-      )
-    );
-  };
-
-  const handleToggleShared = (id: string) => {
-    setSharedTodos((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, status: t.status === "completed" ? "pending" : "completed" } : t
-      )
-    );
-  };
-
   /** -------------------------
-   * Render Helpers
+   * Render Content by View
    * ------------------------- */
   const renderMainContent = () => {
     switch (activeView) {
       case "personal":
-        return <PersonalTodos tasks={personalTodos} onToggleStatus={handleTogglePersonal} />;
+        return <PersonalTodos />;
       case "shared":
-        return <SharedTodos tasks={sharedTodos} onToggleStatus={handleToggleShared} />;
+        return <SharedTodos />;
       case "calendar":
         return <CalendarView />;
       case "analytics":
         return <Analytics todoStats={todoStats} />;
       default:
-        return <PersonalTodos tasks={personalTodos} onToggleStatus={handleTogglePersonal} />;
+        return <PersonalTodos />;
     }
   };
 
-  const getPageMeta = (): { title: string; description: string } => {
+  /** -------------------------
+   * Page Metadata
+   * ------------------------- */
+  const getPageMeta = () => {
     switch (activeView) {
       case "personal":
-        return { title: "Personal Tasks", description: "Manage your personal tasks and goals" };
+        return {
+          title: "Personal Tasks",
+          description: "Manage your personal tasks and goals",
+        };
       case "shared":
-        return { title: "Shared Tasks", description: "Collaborate on shared projects" };
+        return {
+          title: "Shared Tasks",
+          description: "Collaborate on shared projects",
+        };
       case "calendar":
-        return { title: "Calendar View", description: "View tasks organized by due date" };
+        return {
+          title: "Calendar View",
+          description: "View tasks organized by due date",
+        };
       case "analytics":
-        return { title: "Analytics Dashboard", description: "Track your productivity metrics" };
+        return {
+          title: "Analytics Dashboard",
+          description: "Track your productivity metrics",
+        };
       default:
-        return { title: "Dashboard", description: "Welcome to your dashboard" };
+        return {
+          title: "Dashboard",
+          description: "Welcome to your dashboard",
+        };
     }
   };
 
@@ -147,15 +97,18 @@ function Dashboard() {
         <AppSidebar
           activeView={activeView}
           onNavigate={setActiveView}
-          onCreateTodo={handleCreateTodo}
+          onCreateTodo={handleCreateTask}
           todoStats={todoStats}
         />
       </div>
 
-      {/* Mobile Sidebar (overlay) */}
+      {/* Mobile Sidebar */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 flex md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setSidebarOpen(false)}
+          />
           <div className="relative z-50 w-64">
             <AppSidebar
               activeView={activeView}
@@ -164,7 +117,7 @@ function Dashboard() {
                 setSidebarOpen(false);
               }}
               onCreateTodo={() => {
-                handleCreateTodo();
+                handleCreateTask();
                 setSidebarOpen(false);
               }}
               todoStats={todoStats}
@@ -174,7 +127,8 @@ function Dashboard() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col mt-16 md:ml-64">
+      <div className="flex-1 flex flex-col mt-5 md:ml-64">
+        {/* Header */}
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-16 items-center justify-between px-4 md:px-6">
             <div className="flex items-center gap-3">
@@ -185,25 +139,38 @@ function Dashboard() {
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{title}</h1>
-                <p className="text-xs md:text-sm text-muted-foreground">{description}</p>
+                <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
+                  {title}
+                </h1>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  {description}
+                </p>
               </div>
             </div>
+
             {(activeView === "personal" || activeView === "shared") && (
-              <Button onClick={handleCreateTodo} className="gap-2 text-sm md:text-base text-white">
+              <Button
+                onClick={handleCreateTask}
+                className="gap-2 text-sm md:text-base text-white"
+              >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">New Todo</span>
+                <span className="hidden sm:inline">New Task</span>
               </Button>
             )}
           </div>
         </header>
+
+        {/* Content */}
         <main className="flex-1 p-4 md:p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">{renderMainContent()}</div>
         </main>
       </div>
 
       {/* Create Task Modal */}
-      <CreateTaskModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 }

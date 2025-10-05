@@ -109,7 +109,7 @@ function AppSidebar({
         {/* Create Todo Button */}
         <div className="p-4 ">
           <Button onClick={onCreateTodo} className="w-full gap-2  text-white">
-            {collapsed ? <Plus className="w-4 h-4" /> : <><Plus className="w-4 h-4" /><span>Create Todo</span></>}
+            {collapsed ? <Plus className="w-4 h-4" /> : <><Plus className="w-4 h-4" /><span>Create Tasks</span></>}
           </Button>
         </div>
 

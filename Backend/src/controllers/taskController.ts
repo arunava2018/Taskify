@@ -20,12 +20,12 @@ export const createTask = async (req: Request, res: Response) => {
       priority,
       due_date,
       is_shareable,
-      created_by: userId,     // store Clerk ID
-      collaborators: [],      // initially no collaborators
+      created_by: userId,
+      collaborators: [],
     });
 
     await task.save();
-    res.status(201).json({message: "Task created successfully", task });
+    res.status(201).json({ message: "Task created successfully", task });
   } catch (error) {
     console.error("Error creating task:", error);
     res.status(400).json({ error: "Failed to create task" });
@@ -43,7 +43,6 @@ export const getTasks = async (req: Request, res: Response) => {
     const tasks = await Task.find({
       $or: [{ created_by: userId }, { collaborators: userId }],
     });
-
     res.json(tasks);
   } catch (error) {
     console.error("Error fetching tasks:", error);

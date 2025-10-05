@@ -4,6 +4,7 @@ import cors from "cors";
 import webhookRoutes from "./routes/webhookRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import todoRoutes from "./routes/todoRoutes"
+import userRoutes from "./routes/userRoutes"
 import { connectDB } from "./config/db";
 import { clerkMiddleware, getAuth } from "@clerk/express";
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/webhooks", webhookRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/todos", todoRoutes);
+app.use("/api/users", userRoutes);
 app.use("/",(req,res)=>{
   res.send("Server is running")
 })

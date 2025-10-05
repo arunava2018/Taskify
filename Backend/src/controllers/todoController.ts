@@ -21,6 +21,7 @@ export const createTodo = async (req: Request, res: Response) => {
       due_date,
       task_id: taskId,
       created_by: userId,
+      is_completed:false
     });
 
     const savedTodo = await newTodo.save();
