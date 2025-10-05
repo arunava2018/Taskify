@@ -61,11 +61,18 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/tasks");
-        const data = await res.json();
-        // Suppose backend returns { personal, shared, stats }
-        setPersonalTodos(data.personal || []);
-        setSharedTodos(data.shared || []);
+        const personalTasks = await fetch("/api/tasks/personal");
+        const sharedTasks = await fetch("/api/sharedtasks");
+        const stats = await fetch("/api/tasks/stats");
+        const data = await stats.json();
+        if (personalTasks.ok) {
+          const personalData = await personalTasks.json();
+          setPersonalTodos(personalData.tasks || []);
+        }
+        if (sharedTasks.ok) {
+          const sharedData = await sharedTasks.json();
+          setSharedTodos(sharedData.tasks || []);
+        }
         setTodoStats(data.stats || { personal: 0, shared: 0, overdue: 0, completed: 0 });
       } catch (err) {
         console.error("Failed to fetch tasks", err);
