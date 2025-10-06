@@ -14,12 +14,15 @@ export const createTask = async (req: Request, res: Response) => {
     const userId = (req as any).userId; // Clerk userId from auth middleware
     const { title, description, priority, due_date, is_shareable } = req.body;
 
+    // Always explicitly set unique_code
+    const unique_code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const task = new Task({
       title,
       description,
       priority,
       due_date,
       is_shareable,
+      unique_code,
       created_by: userId,
       collaborators: [],
     });
@@ -31,6 +34,7 @@ export const createTask = async (req: Request, res: Response) => {
     res.status(400).json({ error: "Failed to create task" });
   }
 };
+
 
 /**
  * Get all tasks for a user
@@ -85,12 +89,22 @@ export const getSharedTasks = async (req: Request, res: Response) => {
       is_shareable: true,
     });
 
-    res.json(tasks);
+    const frontendBaseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    const tasksWithLinks = tasks.map((task) => {
+      return {
+        ...task.toObject(),
+        shareableLink: `${frontendBaseUrl}/invite/${task._id}?code=${task.unique_code}`,
+      };
+    });
+
+    res.json(tasksWithLinks);
   } catch (error) {
     console.error("Error fetching shared tasks:", error);
     res.status(500).json({ error: "Failed to fetch shared tasks" });
   }
 };
+
 
 /**
  * Get a single task
@@ -211,20 +225,19 @@ export const enableShareTask = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Only owner can enable sharing" });
     }
 
-    // generate unique code if not already set
-    if (!task.unique_code) {
-      task.unique_code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    }
+    // Always regenerate unique code when enabling sharing
+    task.unique_code = Math.random().toString(36).substring(2, 8).toUpperCase();
     task.is_shareable = true;
     await task.save();
-
-    const shareableLink = `${req.protocol}://${req.get("host")}/tasks/${task._id}/invite/${task.unique_code}`;
+    const frontendBaseUrl = process.env.FRONTEND_URL;
+    const shareableLink = `${frontendBaseUrl}/invite/${task._id}?code=${task.unique_code}`;
     res.json({ task, shareableLink });
   } catch (error) {
     console.error("Error enabling share:", error);
     res.status(500).json({ error: "Failed to enable share" });
   }
 };
+
 
 /**
  * Disable task sharing
@@ -247,8 +260,6 @@ export const disableShareTask = async (req: Request, res: Response) => {
     }
 
     task.is_shareable = false;
-    task.unique_code = null;
-
     // Remove task reference from all collaborators' shared_tasks
     const collaborators = await User.find({ user_id: { $in: task.collaborators } });
     for (const collaborator of collaborators) {
@@ -285,11 +296,13 @@ export const acceptTaskInvitation = async (req: Request, res: Response) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-
+    if(!task.is_shareable){
+      return res.status(404).json({message : "Task is private now"});
+    }
     if (task.unique_code !== code) {
       return res.status(400).json({ message: "Invalid invitation code" });
     }
-
+    
     // Prevent duplicate collaborators
     if (task.collaborators.includes(userId)) {
       return res.status(400).json({ message: "Already a collaborator" });

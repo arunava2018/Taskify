@@ -81,8 +81,6 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
 
     try {
       const token = await getToken();
-
-      // 1️⃣ Create task only
       const taskRes = await axios.post(
         `${BASEURL}/api/tasks`,
         {

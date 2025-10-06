@@ -3,7 +3,6 @@ import { Menu, Plus } from "lucide-react";
 import AppSidebar from "./AppSidebar";
 import PersonalTodos from "./PersonalTasks";
 import SharedTodos from "./SharedTasks";
-import CalendarView from "./CalendarView";
 import Analytics from "./Analytics";
 import CreateTaskModal from "./CreateTaskModal";
 import { Button } from "@/components/ui/button";
@@ -22,24 +21,17 @@ type ViewType =
   | "Medium Priority"
   | "Low Priority";
 
-interface TodoStats {
-  personal: number;
-  shared: number;
-  overdue: number;
-  completed: number;
-}
+// interface TodoStats {
+//   personal: number;
+//   shared: number;
+//   overdue: number;
+//   completed: number;
+// }
 
 function Dashboard() {
   const [activeView, setActiveView] = useState<ViewType>("personal");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [todoStats, setTodoStats] = useState<TodoStats>({
-    personal: 0,
-    shared: 0,
-    overdue: 0,
-    completed: 0,
-  });
-
   /** -------------------------
    * Handle Create Task Modal
    * ------------------------- */
@@ -57,7 +49,7 @@ function Dashboard() {
       case "shared":
         return <SharedTodos />;
       case "analytics":
-        return <Analytics todoStats={todoStats} />;
+        return <Analytics/>;
       case "High Priority":
         return <HighPriority />;
       case "Medium Priority":
@@ -127,7 +119,7 @@ function Dashboard() {
           activeView={activeView}
           onNavigate={setActiveView}
           onCreateTodo={handleCreateTask}
-          todoStats={todoStats}
+          // todoStats={todoStats}
         />
       </div>
 
@@ -149,7 +141,7 @@ function Dashboard() {
                 handleCreateTask();
                 setSidebarOpen(false);
               }}
-              todoStats={todoStats}
+              // todoStats={todoStats}
             />
           </div>
         </div>

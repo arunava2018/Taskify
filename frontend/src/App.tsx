@@ -16,8 +16,8 @@ function App() {
         { path: "/dashboard", element: <Dashboard /> },
       ],
     },
-    { path: "/sign-in", element: <SignInPage /> },
-    { path: "/sign-up", element: <SignUpPage /> },
+    { path: "/sign-in/*", element: <SignInPage /> },
+    { path: "/sign-up/*", element: <SignUpPage /> },  
   ]);
 
   return (

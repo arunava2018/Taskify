@@ -36,6 +36,7 @@ export interface Task {
   status: "pending" | "in-progress" | "completed";
   due_date?: string;
   todos?: Todo[];
+  createdAt:string,
   updatedAt: string;
   created_by?: string;
   is_shareable?: boolean;

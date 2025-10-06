@@ -17,8 +17,8 @@ app.use(
   })
 );
 connectDB();
-app.use(express.json());
 app.use("/api/webhooks", webhookRoutes);
+app.use(express.json());
 app.use("/api/tasks", taskRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/users", userRoutes);

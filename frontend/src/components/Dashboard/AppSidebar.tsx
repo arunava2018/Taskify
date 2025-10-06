@@ -57,7 +57,6 @@ interface AppSidebarProps {
 function AppSidebar({
   onNavigate,
   onCreateTodo,
-  todoStats = { personal: 0, shared: 0, overdue: 0, completed: 0 },
   activeView = "personal",
 }: AppSidebarProps) {
   const { user } = useUser();
@@ -68,20 +67,17 @@ function AppSidebar({
       key: "personal" as const,
       label: "Personal Tasks",
       icon: ListTodo,
-      count: todoStats.personal,
       description: "Your personal tasks",
     },
     {
       key: "shared" as const,
       label: "Shared Tasks",
       icon: Users,
-      count: todoStats.shared,
       description: "Collaborative tasks",
     },
     {
       key: "High Priority" as const,
       label: "High Priority",
-      count: 0,
       description: "High priority tasks",
       icon: AlertTriangle,
       color: "text-red-500",
@@ -89,7 +85,6 @@ function AppSidebar({
     {
       key: "Medium Priority" as const,
       label: "Medium Priority",
-      count: 0,
       description: "Medium priority tasks",
       icon: Clock,
       color: "text-yellow-500",
@@ -97,7 +92,7 @@ function AppSidebar({
     {
       key: "Low Priority" as const,
       label: "Low Priority",
-      count: 0,
+
       description: "Low priority tasks",
       icon: CheckCircle2,
       color: "text-green-500",
@@ -106,7 +101,6 @@ function AppSidebar({
       key: "analytics" as const,
       label: "Analytics",
       icon: BarChart3,
-      count: todoStats.completed,
       description: "Track progress",
     },
   ];
@@ -195,12 +189,6 @@ function AppSidebar({
                         item.color ? item.color : isActive ? "text-primary" : ""
                       }`}
                     />
-                    {/* Count badge for collapsed state */}
-                    {collapsed && item.count > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-                        {item.count > 99 ? '99+' : item.count}
-                      </span>
-                    )}
                   </div>
                   
                   {!collapsed && (
@@ -211,11 +199,6 @@ function AppSidebar({
                           {item.description}
                         </div>
                       </div>
-                      {item.count > 0 && (
-                        <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full font-medium ml-2">
-                          {item.count > 99 ? '99+' : item.count}
-                        </span>
-                      )}
                     </div>
                   )}
                 </Button>
