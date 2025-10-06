@@ -115,6 +115,62 @@ function SharedTodos() {
     toast.success("Invite link copied!");
   };
 
+  const handleToggleTodo = async (taskId: string, todoId: string) => {
+      try {
+        const token = await getToken({ template: "postman-test" });
+        const res = await axios.patch(
+          `${BASEURL}/api/todos/${todoId}/toggle`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+  
+        const { data: updatedTodo, taskStatus } = res.data;
+  
+        setTasks((prev) =>
+          prev.map((t) =>
+            t._id === taskId
+              ? {
+                  ...t,
+                  status: taskStatus,
+                  todos: t.todos?.map((todo) =>
+                    todo._id === updatedTodo._id ? updatedTodo : todo
+                  ),
+                }
+              : t
+          )
+        );
+  
+        if (selectedTask?._id === taskId) {
+          setSelectedTask((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  status: taskStatus,
+                  todos: prev.todos?.map((todo) =>
+                    todo._id === updatedTodo._id ? updatedTodo : todo
+                  ),
+                }
+              : prev
+          );
+        }
+      } catch (err) {
+        console.error("Failed to toggle todo", err);
+      }
+  };
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const token = await getToken({ template: "postman-test" });
+      await axios.delete(`${BASEURL}/api/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTasks((prev) => prev.filter((t) => t._id !== taskId));
+      if (selectedTask?._id === taskId) setSelectedTask(null);
+      toast.success("Task deleted!");
+    } catch (err) {
+      console.error("Failed to delete task", err);
+      toast.error("Failed to delete task");
+    }
+  };
   // --- Disable collaboration (owner only) ---
   const handleDisableCollaboration = async (task: SharedTask) => {
     try {
@@ -270,8 +326,8 @@ function SharedTodos() {
           <div className="lg:col-span-8 bg-card rounded-lg border border-border p-4 lg:p-6 overflow-y-auto">
             <TaskDetails
               selectedTask={selectedTask}
-              handleToggleTodo={() => {}}
-              handleDeleteTask={() => {}}
+              handleToggleTodo={handleToggleTodo}
+              handleDeleteTask={handleDeleteTask}
               handleUpdateTask={() => {}}
               formatDate={formatDate}
               getPriorityColor={(priority: string) =>
