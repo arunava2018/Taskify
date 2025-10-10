@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,10 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { Shield, Lock, Users, Mail } from "lucide-react"
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Shield, Lock, Users, Mail } from 'lucide-react';
 
 export function Privacy() {
   return (
@@ -18,8 +18,7 @@ export function Privacy() {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors"
-        >
+          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors">
           Privacy
         </Button>
       </DialogTrigger>
@@ -46,8 +45,8 @@ export function Privacy() {
           <div className="space-y-5 text-sm leading-relaxed text-[var(--muted-foreground)]">
             {/* Intro */}
             <p>
-              We collect minimal data to provide Taskify’s services, never sell your
-              information, and give you control over your data.
+              We collect minimal data to provide Taskify’s services, never sell
+              your information, and give you control over your data.
             </p>
 
             {/* Section: What We Collect */}
@@ -83,11 +82,10 @@ export function Privacy() {
                 Contact
               </h3>
               <p className="mt-2">
-                Questions? Email us at{" "}
+                Questions? Email us at{' '}
                 <a
                   href="mailto:privacy@taskify.com"
-                  className="text-[var(--primary)] underline hover:no-underline"
-                >
+                  className="text-[var(--primary)] underline hover:no-underline">
                   privacy@taskify.com
                 </a>
               </p>
@@ -96,5 +94,5 @@ export function Privacy() {
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

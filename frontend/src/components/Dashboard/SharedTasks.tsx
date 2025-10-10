@@ -1,16 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import axios from "axios";
-import { Loader2, ClipboardList, Menu, ListTodo, X, Copy } from "lucide-react"; // 👈 added Copy
-import { Toaster, toast } from "sonner";
-import TaskDetails from "./TaskDetails";
-import type { Task } from "./PersonalTasks";
+import { useEffect, useState, useCallback } from 'react';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import axios from 'axios';
+import { Loader2, ClipboardList, Menu, ListTodo, X, Copy } from 'lucide-react'; // 👈 added Copy
+import { Toaster, toast } from 'sonner';
+import TaskDetails from './TaskDetails';
+import type { Task } from './PersonalTasks';
 import {
   PRIORITY_COLORS,
   STATUS_COLORS,
   formatDate,
   getProgressColor,
-} from "../../constants";
+} from '../../constants';
 
 export interface SharedTask extends Task {
   collaborators: string[];
@@ -39,7 +39,7 @@ function SharedTodos() {
   const fetchSharedTasksAndTodos = useCallback(async () => {
     try {
       setLoading(true);
-      const token = await getToken({ template: "postman-test" });
+      const token = await getToken({ template: 'postman-test' });
       const taskRes = await axios.get(`${BASEURL}/api/tasks/shared`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -61,25 +61,25 @@ function SharedTodos() {
           }
 
           // fetch owner name
-          let ownerName = "Unknown";
+          let ownerName = 'Unknown';
           try {
             if (task.created_by) {
               const userRes = await axios.get(
                 `${BASEURL}/api/users/${task.created_by}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
-              ownerName = userRes.data.user_name?.split(" ")[0] || "Unknown";
+              ownerName = userRes.data.user_name?.split(' ')[0] || 'Unknown';
             }
           } catch (err) {
-            console.warn("Failed to fetch owner name:", err);
+            console.warn('Failed to fetch owner name:', err);
           }
 
           return {
             ...task,
             todos,
             ownerName,
-            priority: task.priority || "low",
-            status: task.status || "pending",
+            priority: task.priority || 'low',
+            status: task.status || 'pending',
             updatedAt: task.updatedAt || new Date().toISOString(),
           } as SharedTask;
         })
@@ -95,7 +95,7 @@ function SharedTodos() {
         setSelectedTask(null);
       }
     } catch (err) {
-      console.error("Failed to fetch shared tasks", err);
+      console.error('Failed to fetch shared tasks', err);
     } finally {
       setLoading(false);
     }
@@ -108,84 +108,84 @@ function SharedTodos() {
   // --- Copy Invite Link ---
   const handleCopyLink = (link?: string) => {
     if (!link) {
-      toast.error("No invite link available");
+      toast.error('No invite link available');
       return;
     }
     navigator.clipboard.writeText(link);
-    toast.success("Invite link copied!");
+    toast.success('Invite link copied!');
   };
 
   const handleToggleTodo = async (taskId: string, todoId: string) => {
-      try {
-        const token = await getToken({ template: "postman-test" });
-        const res = await axios.patch(
-          `${BASEURL}/api/todos/${todoId}/toggle`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
+    try {
+      const token = await getToken({ template: 'postman-test' });
+      const res = await axios.patch(
+        `${BASEURL}/api/todos/${todoId}/toggle`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { data: updatedTodo, taskStatus } = res.data;
+
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId
+            ? {
+                ...t,
+                status: taskStatus,
+                todos: t.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: taskStatus,
+                todos: prev.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : prev
         );
-  
-        const { data: updatedTodo, taskStatus } = res.data;
-  
-        setTasks((prev) =>
-          prev.map((t) =>
-            t._id === taskId
-              ? {
-                  ...t,
-                  status: taskStatus,
-                  todos: t.todos?.map((todo) =>
-                    todo._id === updatedTodo._id ? updatedTodo : todo
-                  ),
-                }
-              : t
-          )
-        );
-  
-        if (selectedTask?._id === taskId) {
-          setSelectedTask((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  status: taskStatus,
-                  todos: prev.todos?.map((todo) =>
-                    todo._id === updatedTodo._id ? updatedTodo : todo
-                  ),
-                }
-              : prev
-          );
-        }
-      } catch (err) {
-        console.error("Failed to toggle todo", err);
       }
+    } catch (err) {
+      console.error('Failed to toggle todo', err);
+    }
   };
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const token = await getToken({ template: "postman-test" });
+      const token = await getToken({ template: 'postman-test' });
       await axios.delete(`${BASEURL}/api/tasks/${taskId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks((prev) => prev.filter((t) => t._id !== taskId));
       if (selectedTask?._id === taskId) setSelectedTask(null);
-      toast.success("Task deleted!");
+      toast.success('Task deleted!');
     } catch (err) {
-      console.error("Failed to delete task", err);
-      toast.error("Failed to delete task");
+      console.error('Failed to delete task', err);
+      toast.error('Failed to delete task');
     }
   };
   // --- Disable collaboration (owner only) ---
   const handleDisableCollaboration = async (task: SharedTask) => {
     try {
-      const token = await getToken({ template: "postman-test" });
+      const token = await getToken({ template: 'postman-test' });
       await axios.post(
         `${BASEURL}/api/tasks/${task._id}/share/disable`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Collaboration disabled!");
+      toast.success('Collaboration disabled!');
       fetchSharedTasksAndTodos();
     } catch (err) {
-      console.error("Failed to disable collaboration", err);
-      toast.error("Failed to disable collaboration");
+      console.error('Failed to disable collaboration', err);
+      toast.error('Failed to disable collaboration');
     }
   };
 
@@ -207,9 +207,8 @@ function SharedTodos() {
           {/* Sidebar */}
           <div
             className={`lg:col-span-4 ${
-              sidebarOpen ? "block" : "hidden lg:block"
-            } bg-card rounded-lg border border-border p-4 lg:p-6 overflow-y-auto`}
-          >
+              sidebarOpen ? 'block' : 'hidden lg:block'
+            } bg-card rounded-lg border border-border p-4 lg:p-6 overflow-y-auto`}>
             <div className="flex items-center mb-6">
               <h2 className="flex items-center gap-2 font-bold text-base lg:text-md text-card-foreground">
                 <ListTodo className="w-5 h-5 text-primary" />
@@ -233,22 +232,20 @@ function SharedTodos() {
                       key={task._id}
                       className={`group p-3 lg:p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
                         selectedTask?._id === task._id
-                          ? "border-primary bg-primary/5 shadow-sm"
-                          : "border-border bg-background hover:border-border/60"
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border bg-background hover:border-border/60'
                       }`}
                       onClick={() => {
                         setSelectedTask(task);
                         setSidebarOpen(false);
-                      }}
-                    >
+                      }}>
                       <div className="cursor-pointer">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-sm lg:text-base font-semibold text-card-foreground truncate flex-1 mr-2">
                             {task.title}
                           </h3>
                           <span
-                            className={`px-2 py-0.5 rounded-md text-xs font-medium border ${STATUS_COLORS[task.status]}`}
-                          >
+                            className={`px-2 py-0.5 rounded-md text-xs font-medium border ${STATUS_COLORS[task.status]}`}>
                             {task.status}
                           </span>
                         </div>
@@ -260,9 +257,8 @@ function SharedTodos() {
                           <div className="flex justify-between text-xs text-muted-foreground mb-1">
                             <span>{progress}%</span>
                             <span>
-                              {
-                                task.todos.filter((t) => t.is_completed).length
-                              }/{task.todos.length} done
+                              {task.todos.filter((t) => t.is_completed).length}/
+                              {task.todos.length} done
                             </span>
                           </div>
                           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
@@ -278,15 +274,18 @@ function SharedTodos() {
 
                       <p className="text-xs text-muted-foreground mt-2">
                         {task.created_by === user?.id
-                          ? "Created by You"
-                          : `Created by ${task.ownerName}`}{" "}
+                          ? 'Created by You'
+                          : `Created by ${task.ownerName}`}{' '}
                         <br />
                         Last updated: {formatDate(task.updatedAt)}
                         <br />
-                        {task.collaborators.length === 0 ? 
-                           <span>Waiting for Collaborators</span>:
-                           <span>Collaborators : {task.collaborators.length}</span>
-                        }
+                        {task.collaborators.length === 0 ? (
+                          <span>Waiting for Collaborators</span>
+                        ) : (
+                          <span>
+                            Collaborators : {task.collaborators.length}
+                          </span>
+                        )}
                       </p>
 
                       {/* Action buttons */}
@@ -297,8 +296,7 @@ function SharedTodos() {
                             e.stopPropagation();
                             handleCopyLink(task.shareableLink);
                           }}
-                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20"
-                        >
+                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20">
                           <Copy className="w-3 h-3" /> Copy Link
                         </button>
 
@@ -309,8 +307,7 @@ function SharedTodos() {
                               e.stopPropagation();
                               handleDisableCollaboration(task);
                             }}
-                            className="px-2 py-1 text-xs rounded-md border transition-colors bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20"
-                          >
+                            className="px-2 py-1 text-xs rounded-md border transition-colors bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20">
                             Disable
                           </button>
                         )}
@@ -331,10 +328,14 @@ function SharedTodos() {
               handleUpdateTask={() => {}}
               formatDate={formatDate}
               getPriorityColor={(priority: string) =>
-                PRIORITY_COLORS[priority] || "bg-muted"
+                PRIORITY_COLORS[priority] || 'bg-muted'
               }
               onTodoAdded={(newTodo) =>
-                selectedTask && setSelectedTask({ ...selectedTask, todos: [...(selectedTask.todos || []), newTodo] })
+                selectedTask &&
+                setSelectedTask({
+                  ...selectedTask,
+                  todos: [...(selectedTask.todos || []), newTodo],
+                })
               }
             />
           </div>

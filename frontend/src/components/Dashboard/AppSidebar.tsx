@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   ListTodo,
   Users,
@@ -9,18 +9,22 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useUser } from "@clerk/clerk-react";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useUser } from '@clerk/clerk-react';
 
 // Tooltip component for collapsed state
-const TooltipWrapper = ({ children, content, collapsed }: { 
-  children: React.ReactNode; 
-  content: string; 
+const TooltipWrapper = ({
+  children,
+  content,
+  collapsed,
+}: {
+  children: React.ReactNode;
+  content: string;
   collapsed: boolean;
 }) => {
   if (!collapsed) return <>{children}</>;
-  
+
   return (
     <div className="relative group">
       {children}
@@ -34,13 +38,13 @@ const TooltipWrapper = ({ children, content, collapsed }: {
 
 // Define shared type so Dashboard & Sidebar agree
 export type ViewType =
-  | "personal"
-  | "shared"
-  | "calendar"
-  | "analytics"
-  | "High Priority"
-  | "Medium Priority"
-  | "Low Priority";
+  | 'personal'
+  | 'shared'
+  | 'calendar'
+  | 'analytics'
+  | 'High Priority'
+  | 'Medium Priority'
+  | 'Low Priority';
 
 interface AppSidebarProps {
   onNavigate: (view: ViewType) => void;
@@ -57,62 +61,62 @@ interface AppSidebarProps {
 function AppSidebar({
   onNavigate,
   onCreateTodo,
-  activeView = "personal",
+  activeView = 'personal',
 }: AppSidebarProps) {
   const { user } = useUser();
   const [collapsed, setCollapsed] = useState(false);
 
   const navigationItems = [
     {
-      key: "personal" as const,
-      label: "Personal Tasks",
+      key: 'personal' as const,
+      label: 'Personal Tasks',
       icon: ListTodo,
-      description: "Your personal tasks",
+      description: 'Your personal tasks',
     },
     {
-      key: "shared" as const,
-      label: "Shared Tasks",
+      key: 'shared' as const,
+      label: 'Shared Tasks',
       icon: Users,
-      description: "Collaborative tasks",
+      description: 'Collaborative tasks',
     },
     {
-      key: "High Priority" as const,
-      label: "High Priority",
-      description: "High priority tasks",
+      key: 'High Priority' as const,
+      label: 'High Priority',
+      description: 'High priority tasks',
       icon: AlertTriangle,
-      color: "text-red-500",
+      color: 'text-red-500',
     },
     {
-      key: "Medium Priority" as const,
-      label: "Medium Priority",
-      description: "Medium priority tasks",
+      key: 'Medium Priority' as const,
+      label: 'Medium Priority',
+      description: 'Medium priority tasks',
       icon: Clock,
-      color: "text-yellow-500",
+      color: 'text-yellow-500',
     },
     {
-      key: "Low Priority" as const,
-      label: "Low Priority",
+      key: 'Low Priority' as const,
+      label: 'Low Priority',
 
-      description: "Low priority tasks",
+      description: 'Low priority tasks',
       icon: CheckCircle2,
-      color: "text-green-500",
+      color: 'text-green-500',
     },
     {
-      key: "analytics" as const,
-      label: "Analytics",
+      key: 'analytics' as const,
+      label: 'Analytics',
       icon: BarChart3,
-      description: "Track progress",
+      description: 'Track progress',
     },
   ];
 
   return (
     <aside
       className={`fixed top-16 left-0 h-full md:h-[calc(100vh-64px)] border-r bg-background flex flex-col transition-all duration-300 shadow-sm ${
-        collapsed ? "w-20" : "w-64"
-      }`}
-    >
+        collapsed ? 'w-20' : 'w-64'
+      }`}>
       {/* Header: User profile + Collapse toggle */}
-      <div className={`${collapsed ? 'p-2' : 'p-4'} border-b flex items-center justify-between shrink-0`}>
+      <div
+        className={`${collapsed ? 'p-2' : 'p-4'} border-b flex items-center justify-between shrink-0`}>
         {!collapsed && user && (
           <div className="flex items-center gap-3 truncate">
             <img
@@ -122,7 +126,7 @@ function AppSidebar({
             />
             <div className="flex flex-col min-w-0">
               <span className="font-medium text-sm truncate">
-                {user.fullName || "User"}
+                {user.fullName || 'User'}
               </span>
               <span className="text-xs text-muted-foreground truncate">
                 {user.primaryEmailAddress?.emailAddress}
@@ -130,9 +134,11 @@ function AppSidebar({
             </div>
           </div>
         )}
-        
+
         {collapsed && user && (
-          <TooltipWrapper content={user.fullName || "User"} collapsed={collapsed}>
+          <TooltipWrapper
+            content={user.fullName || 'User'}
+            collapsed={collapsed}>
             <img
               src={user.imageUrl}
               alt="User avatar"
@@ -145,8 +151,7 @@ function AppSidebar({
           size="icon"
           variant="ghost"
           onClick={() => setCollapsed(!collapsed)}
-          className={`${collapsed ? 'w-full justify-center' : 'ml-auto'} hover:bg-secondary/80`}
-        >
+          className={`${collapsed ? 'w-full justify-center' : 'ml-auto'} hover:bg-secondary/80`}>
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (
@@ -160,10 +165,9 @@ function AppSidebar({
         {/* Create Todo Button */}
         <div className={`${collapsed ? 'p-2' : 'p-4'}`}>
           <TooltipWrapper content="Create Tasks" collapsed={collapsed}>
-            <Button 
-              onClick={onCreateTodo} 
-              className={`w-full gap-2 text-white ${collapsed ? 'px-0 justify-center' : ''}`}
-            >
+            <Button
+              onClick={onCreateTodo}
+              className={`w-full gap-2 text-white ${collapsed ? 'px-0 justify-center' : ''}`}>
               <Plus className="w-4 h-4" />
               {!collapsed && <span>Create Tasks</span>}
             </Button>
@@ -175,22 +179,26 @@ function AppSidebar({
           {navigationItems.map((item) => {
             const isActive = activeView === item.key;
             return (
-              <TooltipWrapper key={item.key} content={item.label} collapsed={collapsed}>
+              <TooltipWrapper
+                key={item.key}
+                content={item.label}
+                collapsed={collapsed}>
                 <Button
-                  variant={isActive ? "secondary" : "ghost"}
+                  variant={isActive ? 'secondary' : 'ghost'}
                   className={`w-full ${collapsed ? 'justify-center px-0 h-12' : 'justify-start gap-3 h-12 px-3'} ${
-                    isActive ? "bg-secondary shadow-sm" : "hover:bg-secondary/50"
+                    isActive
+                      ? 'bg-secondary shadow-sm'
+                      : 'hover:bg-secondary/50'
                   }`}
-                  onClick={() => onNavigate(item.key)}
-                >
+                  onClick={() => onNavigate(item.key)}>
                   <div className="flex items-center justify-center">
                     <item.icon
                       className={`w-5 h-5 ${
-                        item.color ? item.color : isActive ? "text-primary" : ""
+                        item.color ? item.color : isActive ? 'text-primary' : ''
                       }`}
                     />
                   </div>
-                  
+
                   {!collapsed && (
                     <div className="flex-1 flex items-center justify-between">
                       <div className="text-left">

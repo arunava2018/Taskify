@@ -1,18 +1,18 @@
-import type { FC } from "react"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, CheckCircle2, Users, Globe } from "lucide-react"
-import { useUser } from "@clerk/clerk-react"
+import type { FC } from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, CheckCircle2, Users, Globe } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
 const HeroSection: FC = () => {
-  const { user } = useUser()
+  const { user } = useUser();
   const handleClick = () => {
     if (user) {
       // Redirect to dashboard if user is logged in
-      window.location.href = "/dashboard"
+      window.location.href = '/dashboard';
     } else {
       // Redirect to sign-in page if user is not logged in
-      window.location.href = "/sign-in"
-    } 
-  }
+      window.location.href = '/sign-in';
+    }
+  };
   return (
     <main className="max-w-6xl mx-auto px-6 py-14 text-center">
       {/* Trust indicators */}
@@ -33,7 +33,7 @@ const HeroSection: FC = () => {
 
       {/* Main headline */}
       <h1 className="text-5xl md:text-7xl font-bold text-[var(--foreground)] mb-6 tracking-tight max-w-3xl mx-auto leading-[0.9]">
-        The <span className="text-[var(--primary)]">simple</span> way to manage{" "}
+        The <span className="text-[var(--primary)]">simple</span> way to manage{' '}
         <span className="relative inline-block">
           everything
           <span className="absolute -bottom-2 left-0 right-0 h-3 bg-[var(--accent)] opacity-30 -rotate-1 rounded-sm" />
@@ -43,7 +43,7 @@ const HeroSection: FC = () => {
       {/* Subheading */}
       <p className="text-lg md:text-xl text-[var(--muted-foreground)] mb-8 max-w-2xl mx-auto leading-relaxed">
         Streamline your personal tasks, family projects, and team workflows in
-        one powerful platform.{" "}
+        one powerful platform.{' '}
         <span className="font-semibold text-[var(--foreground)]">
           Trusted by millions worldwide.
         </span>
@@ -57,8 +57,7 @@ const HeroSection: FC = () => {
           bg-[var(--primary)] text-white 
           hover:bg-[var(--ring)] shadow-lg hover:shadow-xl 
           transform hover:scale-105 transition-all duration-200"
-          onClick={handleClick}
-        >
+          onClick={handleClick}>
           Start Free Today
           <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
@@ -68,7 +67,7 @@ const HeroSection: FC = () => {
         ✨ Free Forever • No Credit Card Required
       </p>
     </main>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;

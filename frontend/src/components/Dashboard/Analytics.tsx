@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
-import type { Task } from "@/components/Dashboard/PersonalTasks";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { CheckCircle2, AlertTriangle, Clock} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import axios from 'axios';
+import type { Task } from '@/components/Dashboard/PersonalTasks';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import {
   ResponsiveContainer,
   PieChart,
@@ -18,8 +18,8 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-} from "recharts";
-import dayjs from "dayjs";
+} from 'recharts';
+import dayjs from 'dayjs';
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -35,7 +35,7 @@ function Analytics() {
   // Fetch tasks
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = await getToken({ template: "postman-test" });
+      const token = await getToken({ template: 'postman-test' });
 
       const [personalRes, sharedRes] = await Promise.all([
         axios.get(`${BASEURL}/api/tasks/personal`, {
@@ -61,9 +61,9 @@ function Analytics() {
 
     const allTasks = [...personalTasks, ...sharedTasks];
     for (const task of allTasks) {
-      if (task.status === "completed") completed++;
-      else if (task.status === "in-progress") inProgress++;
-      else if (task.status === "pending") pending++;
+      if (task.status === 'completed') completed++;
+      else if (task.status === 'in-progress') inProgress++;
+      else if (task.status === 'pending') pending++;
     }
 
     setCompletedTasks(completed);
@@ -77,13 +77,13 @@ function Analytics() {
     > = {};
 
     allTasks.forEach((task) => {
-      const day = dayjs(task.createdAt).format("YYYY-MM-DD");
+      const day = dayjs(task.createdAt).format('YYYY-MM-DD');
       if (!grouped[day]) {
         grouped[day] = { completed: 0, inProgress: 0, pending: 0 };
       }
-      if (task.status === "completed") grouped[day].completed++;
-      else if (task.status === "in-progress") grouped[day].inProgress++;
-      else if (task.status === "pending") grouped[day].pending++;
+      if (task.status === 'completed') grouped[day].completed++;
+      else if (task.status === 'in-progress') grouped[day].inProgress++;
+      else if (task.status === 'pending') grouped[day].pending++;
     });
 
     const trendArr = Object.entries(grouped).map(([day, counts]) => ({
@@ -96,23 +96,23 @@ function Analytics() {
 
   // Pie chart for status distribution
   const statusData = [
-    { name: "Completed", value: completedTasks },
-    { name: "In Progress", value: inProgressTasks },
-    { name: "Pending", value: pendingTasks },
+    { name: 'Completed', value: completedTasks },
+    { name: 'In Progress', value: inProgressTasks },
+    { name: 'Pending', value: pendingTasks },
   ];
 
   // Pie chart for Personal vs Shared distribution
   const sourceData = [
-    { name: "Personal Tasks", value: personalTasks.length },
-    { name: "Shared Tasks", value: sharedTasks.length },
+    { name: 'Personal Tasks', value: personalTasks.length },
+    { name: 'Shared Tasks', value: sharedTasks.length },
   ];
 
   const COLORS = [
-    "var(--chart-1)",
-    "var(--chart-2)",
-    "var(--chart-3)",
-    "var(--chart-4)",
-    "var(--chart-5)",
+    'var(--chart-1)',
+    'var(--chart-2)',
+    'var(--chart-3)',
+    'var(--chart-4)',
+    'var(--chart-5)',
   ];
 
   return (
@@ -164,8 +164,7 @@ function Analytics() {
                 cy="50%"
                 outerRadius={120}
                 dataKey="value"
-                label
-              >
+                label>
                 {statusData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index]} />
                 ))}
@@ -185,14 +184,32 @@ function Analytics() {
         <CardContent className="h-96">
           <ResponsiveContainer>
             <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--muted-foreground)"
+              />
               <XAxis dataKey="day" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="completed" stroke="var(--chart-1)" strokeWidth={3} />
-              <Line type="monotone" dataKey="inProgress" stroke="var(--chart-2)" strokeWidth={3} />
-              <Line type="monotone" dataKey="pending" stroke="var(--chart-3)" strokeWidth={3} />
+              <Line
+                type="monotone"
+                dataKey="completed"
+                stroke="var(--chart-1)"
+                strokeWidth={3}
+              />
+              <Line
+                type="monotone"
+                dataKey="inProgress"
+                stroke="var(--chart-2)"
+                strokeWidth={3}
+              />
+              <Line
+                type="monotone"
+                dataKey="pending"
+                stroke="var(--chart-3)"
+                strokeWidth={3}
+              />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -206,7 +223,10 @@ function Analytics() {
         <CardContent className="h-80">
           <ResponsiveContainer>
             <BarChart data={sourceData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--muted-foreground)"
+              />
               <XAxis dataKey="name" stroke="var(--muted-foreground)" />
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip />

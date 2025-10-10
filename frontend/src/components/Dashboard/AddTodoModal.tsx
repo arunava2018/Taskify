@@ -5,22 +5,22 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { useAuth } from "@clerk/clerk-react";
-import axios from "axios";
-import { useState } from "react";
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { useAuth } from '@clerk/clerk-react';
+import axios from 'axios';
+import { useState } from 'react';
 
 interface AddTodoModalProps {
   open: boolean;
@@ -31,38 +31,43 @@ interface AddTodoModalProps {
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
-export function AddTodoModal({ open, onClose, taskId, onTodoAdded }: AddTodoModalProps) {
+export function AddTodoModal({
+  open,
+  onClose,
+  taskId,
+  onTodoAdded,
+}: AddTodoModalProps) {
   const { getToken } = useAuth();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("low");
-  const [dueDate, setDueDate] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('low');
+  const [dueDate, setDueDate] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAddTodo = async () => {
     if (!title.trim()) {
-      toast.error("Title is required");
+      toast.error('Title is required');
       return;
     }
     setLoading(true);
     try {
-      const token = await getToken({ template: "postman-test" });
+      const token = await getToken({ template: 'postman-test' });
       const res = await axios.post(
         `${BASEURL}/api/todos/${taskId}`,
         { title, description, priority, due_date: dueDate },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("API response new todo:", res.data);
+      console.log('API response new todo:', res.data);
       onTodoAdded(res.data.data); // push new todo into state in parent
-      toast.success("Todo added!");
-      setTitle("");
-      setDescription("");
-      setPriority("low");
-      setDueDate("");
+      toast.success('Todo added!');
+      setTitle('');
+      setDescription('');
+      setPriority('low');
+      setDueDate('');
       onClose();
     } catch (err) {
-      console.error("Failed to add todo", err);
-      toast.error("Failed to add todo");
+      console.error('Failed to add todo', err);
+      toast.error('Failed to add todo');
     } finally {
       setLoading(false);
     }
@@ -99,7 +104,11 @@ export function AddTodoModal({ open, onClose, taskId, onTodoAdded }: AddTodoModa
 
           <div className="space-y-2">
             <Label>Priority</Label>
-            <Select value={priority} onValueChange={(val: "low" | "medium" | "high") => setPriority(val)}>
+            <Select
+              value={priority}
+              onValueChange={(val: 'low' | 'medium' | 'high') =>
+                setPriority(val)
+              }>
               <SelectTrigger>
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
@@ -125,8 +134,11 @@ export function AddTodoModal({ open, onClose, taskId, onTodoAdded }: AddTodoModa
           <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button onClick={handleAddTodo} disabled={loading} className="text-white bg-primary hover:bg-primary/90">
-            {loading ? "Adding..." : "Add Todo"}
+          <Button
+            onClick={handleAddTodo}
+            disabled={loading}
+            className="text-white bg-primary hover:bg-primary/90">
+            {loading ? 'Adding...' : 'Add Todo'}
           </Button>
         </DialogFooter>
       </DialogContent>

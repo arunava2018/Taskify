@@ -1,16 +1,15 @@
-import { FEATURES } from "@/constants";
-import type { FC } from "react";
+import { FEATURES } from '@/constants';
+import type { FC } from 'react';
 
 const Feature: FC = () => {
   return (
     <section
       id="features"
-      className="lg:py-10 py-6 bg-[var(--background)] text-[var(--foreground)]"
-    >
+      className="lg:py-10 py-6 bg-[var(--background)] text-[var(--foreground)]">
       {/* Header */}
       <div className="text-center mb-12 md:max-w-3xl mx-auto px-4">
         <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
-          Everything you need to{" "}
+          Everything you need to{' '}
           <span className="text-[var(--primary)]">get things done</span>
         </h2>
         <p className="text-lg md:text-xl text-[var(--muted-foreground)] max-w-xl mx-auto leading-relaxed">
@@ -28,8 +27,7 @@ const Feature: FC = () => {
               className="group relative bg-[var(--card)] rounded-2xl p-6 shadow-sm border border-[var(--border)] hover:shadow-xl hover:border-[var(--primary)]/40 transition-all duration-300 hover:-translate-y-1"
               style={{
                 animationDelay: `${index * 100}ms`,
-              }}
-            >
+              }}>
               {/* Icon Container */}
               <div className="mb-4">
                 <div className="w-12 h-12 bg-[var(--muted)] rounded-xl flex items-center justify-center group-hover:bg-[var(--primary)] transition-colors duration-300">

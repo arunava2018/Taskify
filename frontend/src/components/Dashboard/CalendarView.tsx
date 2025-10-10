@@ -1,10 +1,5 @@
-
 function CalendarView() {
-  return (
-    <div>
-      Hi
-    </div>
-  )
+  return <div>Hi</div>;
 }
 
-export default CalendarView
+export default CalendarView;

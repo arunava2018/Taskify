@@ -1,10 +1,10 @@
-import { FAQS } from "@/constants"
+import { FAQS } from '@/constants';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from '@/components/ui/accordion';
 
 export default function Faq() {
   return (
@@ -12,7 +12,7 @@ export default function Faq() {
       {/* Header */}
       <div className="text-center mb-10 max-w-4xl mx-auto px-6">
         <h2 className="text-5xl md:text-5xl lg:text-7xl font-bold mb-4">
-          Frequently Asked{" "}
+          Frequently Asked{' '}
           <span className="text-[var(--primary)]">Questions</span>
         </h2>
         <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
@@ -27,8 +27,7 @@ export default function Faq() {
             <AccordionItem
               key={id}
               value={`faq-${id}`}
-              className="border border-[var(--border)] rounded-[var(--radius)] bg-[var(--card)]"
-            >
+              className="border border-[var(--border)] rounded-[var(--radius)] bg-[var(--card)]">
               <AccordionTrigger className="px-4 py-3 text-[var(--card-foreground)] font-medium hover:no-underline">
                 {question}
               </AccordionTrigger>
@@ -40,5 +39,5 @@ export default function Faq() {
         </Accordion>
       </div>
     </section>
-  )
+  );
 }

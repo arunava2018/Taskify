@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import { useAuth } from "@clerk/clerk-react";
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { useAuth } from '@clerk/clerk-react';
 import {
   Dialog,
   DialogContent,
@@ -8,22 +8,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Flag, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Flag, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -36,20 +36,22 @@ interface CreateTaskModalProps {
 function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
   const { getToken } = useAuth();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [isShareable, setIsShareable] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fieldValidation, setFieldValidation] = useState<Record<string, boolean>>({});
+  const [fieldValidation, setFieldValidation] = useState<
+    Record<string, boolean>
+  >({});
 
   // Reset form when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
       setIsShareable(false);
       setErrors({});
       setIsSubmitting(false);
@@ -60,11 +62,11 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
   // Validate title
   const validateTitle = useCallback((value: string) => {
     if (!value.trim()) {
-      setErrors((prev) => ({ ...prev, title: "Task title is required" }));
+      setErrors((prev) => ({ ...prev, title: 'Task title is required' }));
       setFieldValidation((prev) => ({ ...prev, title: false }));
       return false;
     } else {
-      setErrors((prev) => ({ ...prev, title: "" }));
+      setErrors((prev) => ({ ...prev, title: '' }));
       setFieldValidation((prev) => ({ ...prev, title: true }));
       return true;
     }
@@ -97,7 +99,7 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
       const createdTask = taskRes.data.task;
 
       // Show toast
-      toast.success("Task created successfully!");
+      toast.success('Task created successfully!');
 
       // Update parent immediately (no reload)
       if (onSubmit) {
@@ -107,8 +109,8 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
       onClose();
     } catch (error) {
       console.error(error);
-      setErrors({ general: "Failed to create task. Please try again." });
-      toast.error("Failed to create task. Please try again.");
+      setErrors({ general: 'Failed to create task. Please try again.' });
+      toast.error('Failed to create task. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -117,15 +119,15 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
   // Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen && !isSubmitting) {
+      if (e.key === 'Escape' && isOpen && !isSubmitting) {
         onClose();
       }
     };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, isSubmitting, onClose]);
 
-  const getPriorityIcon = (priority: "low" | "medium" | "high") => {
+  const getPriorityIcon = (priority: 'low' | 'medium' | 'high') => {
     const icons = {
       high: <Flag className="w-4 h-4 text-red-500" />,
       medium: <Flag className="w-4 h-4 text-yellow-500" />,
@@ -176,15 +178,15 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
                 placeholder="Enter a clear, descriptive task title"
                 className={`pr-10 ${
                   errors.title
-                    ? "border-red-500"
+                    ? 'border-red-500'
                     : fieldValidation.title
-                    ? "border-green-500"
-                    : ""
+                      ? 'border-green-500'
+                      : ''
                 }`}
                 disabled={isSubmitting}
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                {getValidationIcon("title")}
+                {getValidationIcon('title')}
               </div>
             </div>
             {errors.title && (
@@ -220,27 +222,26 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
               <Select
                 value={priority}
                 onValueChange={(val) =>
-                  setPriority(val as "low" | "medium" | "high")
+                  setPriority(val as 'low' | 'medium' | 'high')
                 }
-                disabled={isSubmitting}
-              >
+                disabled={isSubmitting}>
                 <SelectTrigger id="taskPriority">
                   <SelectValue placeholder="Select priority level" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="high">
                     <div className="flex items-center gap-2">
-                      {getPriorityIcon("high")} High Priority
+                      {getPriorityIcon('high')} High Priority
                     </div>
                   </SelectItem>
                   <SelectItem value="medium">
                     <div className="flex items-center gap-2">
-                      {getPriorityIcon("medium")} Medium Priority
+                      {getPriorityIcon('medium')} Medium Priority
                     </div>
                   </SelectItem>
                   <SelectItem value="low">
                     <div className="flex items-center gap-2">
-                      {getPriorityIcon("low")} Low Priority
+                      {getPriorityIcon('low')} Low Priority
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -258,11 +259,8 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
                   onCheckedChange={setIsShareable}
                   disabled={isSubmitting}
                 />
-                <Label
-                  htmlFor="isShareable"
-                  className="text-sm cursor-pointer"
-                >
-                  {isShareable ? "Shared" : "Personal"}
+                <Label htmlFor="isShareable" className="text-sm cursor-pointer">
+                  {isShareable ? 'Shared' : 'Personal'}
                 </Label>
               </div>
             </div>
@@ -274,16 +272,14 @@ function CreateTaskModal({ isOpen, onClose, onSubmit }: CreateTaskModalProps) {
             variant="outline"
             onClick={onClose}
             disabled={isSubmitting}
-            className="flex-1 sm:flex-none sm:min-w-[100px]"
-          >
+            className="flex-1 sm:flex-none sm:min-w-[100px]">
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || Object.values(errors).some((e) => e)}
-            className="flex-1 sm:flex-none sm:min-w-[120px]"
-          >
-            {isSubmitting ? "Creating..." : "Create Task"}
+            className="flex-1 sm:flex-none sm:min-w-[120px]">
+            {isSubmitting ? 'Creating...' : 'Create Task'}
           </Button>
         </DialogFooter>
       </DialogContent>

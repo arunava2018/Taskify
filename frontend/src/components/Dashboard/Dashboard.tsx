@@ -1,25 +1,25 @@
-import { useState, useCallback } from "react";
-import { Menu, Plus } from "lucide-react";
-import AppSidebar from "./AppSidebar";
-import PersonalTodos from "./PersonalTasks";
-import SharedTodos from "./SharedTasks";
-import Analytics from "./Analytics";
-import CreateTaskModal from "./CreateTaskModal";
-import { Button } from "@/components/ui/button";
-import HighPriority from "./HighPriority";
-import MediumPriority from "./MediumPriority";
-import LowPriority from "./LowPriority";
+import { useState, useCallback } from 'react';
+import { Menu, Plus } from 'lucide-react';
+import AppSidebar from './AppSidebar';
+import PersonalTodos from './PersonalTasks';
+import SharedTodos from './SharedTasks';
+import Analytics from './Analytics';
+import CreateTaskModal from './CreateTaskModal';
+import { Button } from '@/components/ui/button';
+import HighPriority from './HighPriority';
+import MediumPriority from './MediumPriority';
+import LowPriority from './LowPriority';
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
 
 type ViewType =
-  | "personal"
-  | "shared"
-  | "calendar"
-  | "analytics"
-  | "High Priority"
-  | "Medium Priority"
-  | "Low Priority";
+  | 'personal'
+  | 'shared'
+  | 'calendar'
+  | 'analytics'
+  | 'High Priority'
+  | 'Medium Priority'
+  | 'Low Priority';
 
 // interface TodoStats {
 //   personal: number;
@@ -29,7 +29,7 @@ type ViewType =
 // }
 
 function Dashboard() {
-  const [activeView, setActiveView] = useState<ViewType>("personal");
+  const [activeView, setActiveView] = useState<ViewType>('personal');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   /** -------------------------
@@ -44,17 +44,17 @@ function Dashboard() {
    * ------------------------- */
   const renderMainContent = () => {
     switch (activeView) {
-      case "personal":
+      case 'personal':
         return <PersonalTodos />;
-      case "shared":
+      case 'shared':
         return <SharedTodos />;
-      case "analytics":
-        return <Analytics/>;
-      case "High Priority":
+      case 'analytics':
+        return <Analytics />;
+      case 'High Priority':
         return <HighPriority />;
-      case "Medium Priority":
+      case 'Medium Priority':
         return <MediumPriority />;
-      case "Low Priority":
+      case 'Low Priority':
         return <LowPriority />;
       default:
         return <PersonalTodos />;
@@ -66,45 +66,45 @@ function Dashboard() {
    * ------------------------- */
   const getPageMeta = () => {
     switch (activeView) {
-      case "personal":
+      case 'personal':
         return {
-          title: "Personal Tasks",
-          description: "Manage your personal tasks and goals",
+          title: 'Personal Tasks',
+          description: 'Manage your personal tasks and goals',
         };
-      case "shared":
+      case 'shared':
         return {
-          title: "Shared Tasks",
-          description: "Collaborate on shared projects",
+          title: 'Shared Tasks',
+          description: 'Collaborate on shared projects',
         };
-      case "calendar":
+      case 'calendar':
         return {
-          title: "Calendar View",
-          description: "View tasks organized by due date",
+          title: 'Calendar View',
+          description: 'View tasks organized by due date',
         };
-      case "analytics":
+      case 'analytics':
         return {
-          title: "Analytics Dashboard",
-          description: "Track your productivity metrics",
+          title: 'Analytics Dashboard',
+          description: 'Track your productivity metrics',
         };
-      case "High Priority":
+      case 'High Priority':
         return {
-          title: "High Priority Tasks",
-          description: "View and manage your high priority tasks",
+          title: 'High Priority Tasks',
+          description: 'View and manage your high priority tasks',
         };
-      case "Medium Priority":
+      case 'Medium Priority':
         return {
-          title: "Medium Priority Tasks",
-          description: "View and manage your medium priority tasks",
+          title: 'Medium Priority Tasks',
+          description: 'View and manage your medium priority tasks',
         };
-      case "Low Priority":
+      case 'Low Priority':
         return {
-          title: "Low Priority Tasks",
-          description: "View and manage your low priority tasks",
+          title: 'Low Priority Tasks',
+          description: 'View and manage your low priority tasks',
         };
       default:
         return {
-          title: "Dashboard",
-          description: "Welcome to your dashboard",
+          title: 'Dashboard',
+          description: 'Welcome to your dashboard',
         };
     }
   };
@@ -155,8 +155,7 @@ function Dashboard() {
             <div className="flex items-center gap-3">
               <button
                 className="md:hidden p-2 rounded-md hover:bg-muted"
-                onClick={() => setSidebarOpen(true)}
-              >
+                onClick={() => setSidebarOpen(true)}>
                 <Menu className="w-5 h-5" />
               </button>
               <div>
@@ -169,11 +168,10 @@ function Dashboard() {
               </div>
             </div>
 
-            {(activeView === "personal" || activeView === "shared") && (
+            {(activeView === 'personal' || activeView === 'shared') && (
               <Button
                 onClick={handleCreateTask}
-                className="gap-2 text-sm md:text-base text-white"
-              >
+                className="gap-2 text-sm md:text-base text-white">
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">New Task</span>
               </Button>

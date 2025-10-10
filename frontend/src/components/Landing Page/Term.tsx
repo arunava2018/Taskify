@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,10 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
-import { FileText, Shield, Mail } from "lucide-react"
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { FileText, Shield, Mail } from 'lucide-react';
 
 export function Terms() {
   return (
@@ -18,8 +18,7 @@ export function Terms() {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors"
-        >
+          className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] px-3 py-1 rounded-md transition-colors">
           Terms
         </Button>
       </DialogTrigger>
@@ -46,7 +45,8 @@ export function Terms() {
           <div className="space-y-5 text-sm leading-relaxed text-[var(--muted-foreground)]">
             {/* Intro */}
             <p>
-              By using Taskify, you agree to follow these terms. Please read them carefully.
+              By using Taskify, you agree to follow these terms. Please read
+              them carefully.
             </p>
 
             {/* Section: Usage */}
@@ -82,11 +82,10 @@ export function Terms() {
                 Contact
               </h3>
               <p className="mt-2">
-                Questions? Email us at{" "}
+                Questions? Email us at{' '}
                 <a
                   href="mailto:support@taskify.com"
-                  className="text-[var(--primary)] underline hover:no-underline"
-                >
+                  className="text-[var(--primary)] underline hover:no-underline">
                   support@taskify.com
                 </a>
               </p>
@@ -95,5 +94,5 @@ export function Terms() {
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

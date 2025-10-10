@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   CheckCircle2,
   Circle,
@@ -7,10 +7,10 @@ import {
   Trash2,
   Target,
   Plus,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import type { Task } from "./PersonalTasks";
-import { AddTodoModal } from "./AddTodoModal";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { Task } from './PersonalTasks';
+import { AddTodoModal } from './AddTodoModal';
 
 interface TaskDetailsProps {
   selectedTask: Task | null;
@@ -19,7 +19,7 @@ interface TaskDetailsProps {
   handleUpdateTask: (taskId: string, updates: Partial<Task>) => void;
   formatDate: (dateString: string) => string;
   getPriorityColor: (priority: string) => string;
-  onTodoAdded: (newTodo: any) => void; 
+  onTodoAdded: (newTodo: any) => void;
 }
 
 const TaskDetails: React.FC<TaskDetailsProps> = ({
@@ -56,7 +56,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
             {selectedTask.title}
           </h2>
           <p className="text-xs lg:text-sm text-muted-foreground">
-            {selectedTask.description || "No description"}
+            {selectedTask.description || 'No description'}
           </p>
         </div>
 
@@ -71,8 +71,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
           </button> */}
           <button
             onClick={() => handleDeleteTask(selectedTask._id)}
-            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-          >
+            className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -87,8 +86,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
           </h4>
           <Button
             className="px-1.5 py-1.5 text-sm text-white h-8 w-auto"
-            onClick={() => setShowAddTodo(true)}
-          >
+            onClick={() => setShowAddTodo(true)}>
             <Plus className="w-4 h-4 mr-1" />
             Add Todo
           </Button>
@@ -106,15 +104,13 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                 key={todo._id}
                 className={`p-3 rounded-lg border flex items-start gap-2.5 transition-all duration-200 ${
                   todo.is_completed
-                    ? "bg-green-500/5 border-green-500/20"
-                    : "bg-background border-border hover:border-border/60"
-                }`}
-              >
+                    ? 'bg-green-500/5 border-green-500/20'
+                    : 'bg-background border-border hover:border-border/60'
+                }`}>
                 {/* Toggle Button */}
                 <button
                   onClick={() => handleToggleTodo(selectedTask._id, todo._id)}
-                  className="flex-shrink-0 mt-0.5"
-                >
+                  className="flex-shrink-0 mt-0.5">
                   {todo.is_completed ? (
                     <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                   ) : (
@@ -127,10 +123,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                   <p
                     className={`font-medium break-words text-sm ${
                       todo.is_completed
-                        ? "line-through text-muted-foreground"
-                        : "text-card-foreground"
-                    }`}
-                  >
+                        ? 'line-through text-muted-foreground'
+                        : 'text-card-foreground'
+                    }`}>
                     {todo.title}
                   </p>
                   {todo.description && (
@@ -149,8 +144,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                     <span
                       className={`px-2 py-0.5 rounded text-[11px] lg:text-xs font-medium border ${getPriorityColor(
                         todo.priority
-                      )}`}
-                    >
+                      )}`}>
                       {todo.priority}
                     </span>
                   </div>
