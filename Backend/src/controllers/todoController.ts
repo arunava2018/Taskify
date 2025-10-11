@@ -42,9 +42,9 @@ export const getTodosByTask = async (req: Request, res: Response) => {
     const task = await Task.findById(taskId);
     if (!task) return res.status(404).json({ success: false, message: "Task not found" });
 
-    if (task.created_by !== userId && !task.collaborators.includes(userId)) {
-      return res.status(403).json({ success: false, message: "Access denied" });
-    }
+    // if (task.created_by !== userId && !task.collaborators.includes(userId)) {
+    //   return res.status(403).json({ success: false, message: "Access denied" });
+    // }
 
     const todos = await Todo.find({ task_id: taskId }).sort({ createdAt: -1 });
     res.json({ success: true, data: todos });

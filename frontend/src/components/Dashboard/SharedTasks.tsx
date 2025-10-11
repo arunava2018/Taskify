@@ -15,7 +15,7 @@ import {
 export interface SharedTask extends Task {
   collaborators: string[];
   ownerName?: string;
-  shareableLink?: string; // 👈 added
+  shareableLink?: string;
 }
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
@@ -203,6 +203,18 @@ function SharedTodos() {
     <div className="min-h-screen p-3 sm:p-6 bg-background">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
+        <div className="lg:hidden flex items-center justify-between mb-4 p-4 bg-card rounded-lg border border-border">
+          <h1 className="text-lg font-bold text-foreground">Shared Tasks</h1>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 hover:bg-accent rounded-lg transition-colors">
+            {sidebarOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
+          </button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 h-auto lg:h-[calc(100vh-100px)]">
           {/* Sidebar */}
           <div

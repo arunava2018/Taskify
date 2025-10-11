@@ -44,7 +44,6 @@ router.get("/shared", authMiddleware, getSharedTasks);
 /**
  * GET /api/tasks/:taskId
  * Get details of a single task
- * - Only accessible if user is owner or collaborator
  */
 router.get("/:taskId", authMiddleware, getTaskById);
 

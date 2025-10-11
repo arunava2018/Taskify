@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner';
 import './index.css';
 import Dashboard from './components/Dashboard/Dashboard';
 import Error404 from './components/Error404';
+import InviteTask from './pages/InviteTask';
 
 function App() {
   const router = createBrowserRouter([
@@ -17,6 +18,7 @@ function App() {
       children: [
         { path: '/', element: <Landing /> },
         { path: '/dashboard', element: <Dashboard /> },
+        { path: '/invite/:id', element: <InviteTask /> },
       ],
     },
     { path: '/sign-in/*', element: <SignInPage /> },

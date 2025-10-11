@@ -108,25 +108,15 @@ export const getSharedTasks = async (req: Request, res: Response) => {
 
 /**
  * Get a single task
- * - Only accessible if user is the owner or collaborator
  */
 export const getTaskById = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const { taskId } = req.params;
-
     const task = await Task.findById(taskId);
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-
-    const isOwner = task.created_by === userId;
-    const isCollaborator = task.collaborators.includes(userId);
-
-    if (!(isOwner || isCollaborator)) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
     res.json(task);
   } catch (error) {
     console.error("Error fetching task:", error);
