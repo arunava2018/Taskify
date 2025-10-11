@@ -7,11 +7,13 @@ import { ThemeProvider } from '@/theme/Themeprovides';
 import { Toaster } from '@/components/ui/sonner';
 import './index.css';
 import Dashboard from './components/Dashboard/Dashboard';
+import Error404 from './components/Error404';
 
 function App() {
   const router = createBrowserRouter([
     {
       element: <AppLayout />,
+      errorElement: <Error404 />,
       children: [
         { path: '/', element: <Landing /> },
         { path: '/dashboard', element: <Dashboard /> },
