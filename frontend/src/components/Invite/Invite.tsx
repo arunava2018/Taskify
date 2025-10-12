@@ -124,30 +124,41 @@ const Invite: React.FC = () => {
         return;
       }
 
-      // Send POST request to /api/tasks/:taskId/accept?code=...
       const response = await axios.post(
         `${BASEURL}/api/tasks/${taskId}/accept?code=${code}`,
-        {}, // no body required
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          // Accept all status codes as "resolved" responses
+          validateStatus: () => true,
         }
       );
 
-      // Show success toast
-      toast.success(
-        response.data?.message || 'You successfully joined the project!'
-      );
-    } catch (err: any) {
-      console.error('Error joining project:', err);
-      toast.error(
-        err.response?.data?.message ||
-          'Failed to join the project. Please try again.'
-      );
-    } finally {
+      // Handle all response messages based on status
+      if (response.status === 200) {
+        toast.success(
+          response.data?.message || 'You successfully joined the project!'
+        );
+        setIsJoining(false);
+        window.location.href = '/dashboard';
+      } else if (response.status === 400 || response.status === 403) {
+        toast.warning(
+          response.data?.message || 'You cannot accept this invitation.'
+        );
+      } else if (response.status === 404) {
+        toast.error(
+          response.data?.message || 'Task not found or not shareable.'
+        );
+      } else {
+        toast.error('Unexpected response. Please try again.');
+      }
       setIsJoining(false);
-      window.location.href = '/dashboard';
+    } catch (err) {
+      console.error('Unexpected error joining project:', err);
+      toast.error('Something went wrong. Please try again later.');
+      setIsJoining(false);
     }
   };
 

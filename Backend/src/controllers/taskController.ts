@@ -286,13 +286,16 @@ export const acceptTaskInvitation = async (req: Request, res: Response) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    if(!task.is_shareable){
-      return res.status(404).json({message : "Task is private now"});
-    }
-    if (task.unique_code !== code) {
+    if (!task.is_shareable)
+      return res.status(403).json({ message: "Task is private now" });
+
+    if (task.created_by === userId)
+      return res.status(403).json({ message: "Already an owner" });
+
+    if (task.unique_code !== code)
       return res.status(400).json({ message: "Invalid invitation code" });
-    }
-    
+
+
     // Prevent duplicate collaborators
     if (task.collaborators.includes(userId)) {
       return res.status(400).json({ message: "Already a collaborator" });
