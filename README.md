@@ -43,7 +43,7 @@
 ## 🧠 About The Project
 
 **Taskify** is a **full-stack collaborative task management platform** designed to help users and teams stay productive, organized, and efficient.  
-It allows you to create, manage, and track tasks — either individually or collaboratively — with real-time synchronization across users.
+It allows you to create, manage, and track tasks — either individually or collaboratively across users.
 
 From simple personal to-do lists to complex project workflows, **Taskify** provides a smooth, powerful, and intuitive SaaS experience.
 
