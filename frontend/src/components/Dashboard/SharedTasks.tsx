@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import axios from 'axios';
-import { Loader2, ClipboardList, Menu, ListTodo, X, Copy } from 'lucide-react'; // 👈 added Copy
+import { Loader2, ClipboardList, Menu, ListTodo, X, Copy } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import TaskDetails from './TaskDetails';
 import type { Task } from './PersonalTasks';
@@ -11,6 +11,7 @@ import {
   formatDate,
   getProgressColor,
 } from '../../constants';
+import { socket } from '@/lib/socket';
 
 export interface SharedTask extends Task {
   collaborators: string[];
@@ -28,14 +29,12 @@ function SharedTodos() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // --- Helpers ---
   const getTaskProgress = (task: SharedTask) => {
     if (!task.todos || task.todos.length === 0) return 0;
     const completed = task.todos.filter((t) => t.is_completed).length;
     return Math.round((completed / task.todos.length) * 100);
   };
 
-  // --- Fetch shared tasks ---
   const fetchSharedTasksAndTodos = useCallback(async () => {
     try {
       setLoading(true);
@@ -48,19 +47,19 @@ function SharedTodos() {
 
       const tasksWithExtras = await Promise.all(
         taskList.map(async (task) => {
-          // fetch todos
           let todos: any[] = [];
           try {
             const todoRes = await axios.get(
               `${BASEURL}/api/todos/${task._id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
             );
             todos = todoRes.data.data || [];
           } catch {
             todos = [];
           }
 
-          // fetch owner name
           let ownerName = 'Unknown';
           try {
             if (task.created_by) {
@@ -86,6 +85,7 @@ function SharedTodos() {
       );
 
       setTasks(tasksWithExtras);
+
       if (tasksWithExtras.length > 0) {
         const stillSelected = tasksWithExtras.find(
           (t) => t._id === selectedTask?._id
@@ -105,7 +105,126 @@ function SharedTodos() {
     fetchSharedTasksAndTodos();
   }, [fetchSharedTasksAndTodos]);
 
-  // --- Copy Invite Link ---
+  // Socket Setup and Event Listeners
+  useEffect(() => {
+    if (!selectedTask?._id) return;
+
+    const taskId = selectedTask._id;
+
+    socket.emit('join_task', taskId);
+    // console.log('Joined task room:', taskId);
+
+    const handleTodoCreated = (newTodo: any) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId ? { ...t, todos: [...(t.todos || []), newTodo] } : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev ? { ...prev, todos: [...(prev.todos || []), newTodo] } : prev
+        );
+      }
+    };
+
+    const handleTodoUpdated = (updatedTodo: any) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId
+            ? {
+                ...t,
+                todos: t.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                todos: prev.todos?.map((todo) =>
+                  todo._id === updatedTodo._id ? updatedTodo : todo
+                ),
+              }
+            : prev
+        );
+      }
+    };
+
+    const handleTodoDeleted = ({ todoId }: { todoId: string }) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId
+            ? { ...t, todos: t.todos?.filter((todo) => todo._id !== todoId) }
+            : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? {
+                ...prev,
+                todos: prev.todos?.filter((todo) => todo._id !== todoId),
+              }
+            : prev
+        );
+      }
+    };
+
+    const handleTodoToggled = ({
+      todo,
+      taskStatus,
+    }: {
+      todo: any;
+      taskStatus: string;
+    }) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === taskId
+            ? ({
+                ...t,
+                status: taskStatus,
+                todos: t.todos?.map((td) => (td._id === todo._id ? todo : td)),
+              } as SharedTask)
+            : t
+        )
+      );
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask((prev) =>
+          prev
+            ? ({
+                ...prev,
+                status: taskStatus,
+                todos: prev.todos?.map((td) =>
+                  td._id === todo._id ? todo : td
+                ),
+              } as SharedTask)
+            : prev
+        );
+      }
+    };
+
+    socket.on('todo_created', handleTodoCreated);
+    socket.on('todo_updated', handleTodoUpdated);
+    socket.on('todo_deleted', handleTodoDeleted);
+    socket.on('todo_toggled', handleTodoToggled);
+
+    return () => {
+      socket.emit('leave_task', taskId);
+      socket.off('todo_created', handleTodoCreated);
+      socket.off('todo_updated', handleTodoUpdated);
+      socket.off('todo_deleted', handleTodoDeleted);
+      socket.off('todo_toggled', handleTodoToggled);
+    };
+  }, [selectedTask?._id]);
+
   const handleCopyLink = (link?: string) => {
     if (!link) {
       toast.error('No invite link available');
@@ -157,6 +276,7 @@ function SharedTodos() {
       console.error('Failed to toggle todo', err);
     }
   };
+
   const handleDeleteTask = async (taskId: string) => {
     try {
       const token = await getToken({ template: 'postman-test' });
@@ -171,7 +291,7 @@ function SharedTodos() {
       toast.error('Failed to delete task');
     }
   };
-  // --- Disable collaboration (owner only) ---
+
   const handleDisableCollaboration = async (task: SharedTask) => {
     try {
       const token = await getToken({ template: 'postman-test' });
@@ -215,8 +335,8 @@ function SharedTodos() {
             )}
           </button>
         </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 h-auto lg:h-[calc(100vh-100px)]">
-          {/* Sidebar */}
           <div
             className={`lg:col-span-4 ${
               sidebarOpen ? 'block' : 'hidden lg:block'
@@ -263,7 +383,6 @@ function SharedTodos() {
                         </div>
                       </div>
 
-                      {/* Progress Bar */}
                       {task.todos && task.todos.length > 0 && (
                         <div className="mt-3">
                           <div className="flex justify-between text-xs text-muted-foreground mb-1">
@@ -287,10 +406,11 @@ function SharedTodos() {
                       <p className="text-xs text-muted-foreground mt-2">
                         {task.created_by === user?.id
                           ? 'Created by You'
-                          : `Created by ${task.ownerName}`}{' '}
+                          : `Created by ${task.ownerName}`}
                         <br />
                         Last updated: {formatDate(task.updatedAt)}
                         <br />
+
                         {task.collaborators.length === 0 ? (
                           <span>Waiting for Collaborators</span>
                         ) : (
@@ -300,9 +420,7 @@ function SharedTodos() {
                         )}
                       </p>
 
-                      {/* Action buttons */}
                       <div className="flex items-center gap-2 mt-2">
-                        {/* Share button for everyone */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -312,7 +430,6 @@ function SharedTodos() {
                           <Copy className="w-3 h-3" /> Copy Link
                         </button>
 
-                        {/* Disable Collaboration (owner only) */}
                         {task.created_by === user?.id && (
                           <button
                             onClick={(e) => {
@@ -331,7 +448,6 @@ function SharedTodos() {
             </div>
           </div>
 
-          {/* Task Details */}
           <div className="lg:col-span-8 bg-card rounded-lg border border-border p-4 lg:p-6 overflow-y-auto">
             <TaskDetails
               selectedTask={selectedTask}
