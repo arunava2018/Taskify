@@ -23,7 +23,9 @@ export const createTodo = async (req: Request, res: Response) => {
 
     const task = await Task.findById(taskId);
     if (!task) {
-      return res.status(404).json({ success: false, message: "Task not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
     const newTodo = new Todo({
@@ -38,14 +40,21 @@ export const createTodo = async (req: Request, res: Response) => {
 
     const savedTodo = await newTodo.save();
 
-    emitToTaskRoom(taskId, "todo_created", { todo: savedTodo });
+    console.log("Emitting todo:", savedTodo);
+    emitToTaskRoom(taskId, "todo_created", {
+      todo: savedTodo.toObject(),
+      taskId,
+    });
 
     return res.status(201).json({ success: true, data: savedTodo });
   } catch (error) {
     console.error("Error creating todo:", error);
-    return res.status(500).json({ success: false, message: "Server error", error });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
   }
 };
+
 
 /**
  * Get todos for a specific task
