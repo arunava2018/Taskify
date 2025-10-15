@@ -1,7 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
-import { Loader2, ClipboardList, Menu, ListTodo, X, Copy } from "lucide-react";
+import {
+  Loader2,
+  ClipboardList,
+  Menu,
+  ListTodo,
+  X,
+  Copy,
+  Users,
+} from "lucide-react";
 import { Toaster, toast } from "sonner";
 import TaskDetails from "./TaskDetails";
 import type { Task } from "./PersonalTasks";
@@ -12,11 +20,17 @@ import {
   getProgressColor,
 } from "../../constants";
 import { socket } from "@/lib/socket";
+import CollaboratorsModal from "./CollaboratorsModal";
 
 export interface SharedTask extends Task {
   collaborators: string[];
   ownerName?: string;
   shareableLink?: string;
+}
+
+interface Collaboration {
+  task_id: string;
+  user_id: string;
 }
 
 const BASEURL = import.meta.env.VITE_BACKEND_URL;
@@ -28,6 +42,9 @@ function SharedTasks() {
   const [selectedTask, setSelectedTask] = useState<SharedTask | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collaboratorList, setCollaboratorList] = useState<Collaboration[]>([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedTaskIdForModal, setSelectedTaskIdForModal] = useState<string>("");
 
   // Calculate task progress
   const getTaskProgress = (task: SharedTask) => {
@@ -36,7 +53,7 @@ function SharedTasks() {
     return Math.round((completed / task.todos.length) * 100);
   };
 
-  // Fetch shared tasks and their todos
+  // Fetch shared tasks
   const fetchSharedTasksAndTodos = useCallback(async () => {
     try {
       setLoading(true);
@@ -46,6 +63,15 @@ function SharedTasks() {
       });
 
       const taskList: SharedTask[] = taskRes.data || [];
+
+      //collaborator mapping
+      const collabs: Collaboration[] = [];
+      taskList.forEach((task) => {
+        task.collaborators.forEach((c) => {
+          collabs.push({ task_id: task._id, user_id: c });
+        });
+      });
+      setCollaboratorList(collabs);
 
       const tasksWithExtras = await Promise.all(
         taskList.map(async (task) => {
@@ -84,7 +110,6 @@ function SharedTasks() {
       );
 
       setTasks(tasksWithExtras);
-
       if (tasksWithExtras.length > 0) {
         const stillSelected = tasksWithExtras.find(
           (t) => t._id === selectedTask?._id
@@ -108,125 +133,51 @@ function SharedTasks() {
   useEffect(() => {
     if (!selectedTask?._id) return;
     const taskId = selectedTask._id;
-
     socket.emit("join_task", taskId);
 
-    const handleTodoCreated = ({
-      todo,
-      taskId,
-    }: {
-      todo: any;
-      taskId: string;
-    }) => {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === taskId ? { ...t, todos: [...(t.todos || []), todo] } : t
-        )
-      );
+    const handleTodoEvent = (event: string, handler: (...args: any) => void) =>
+      socket.on(event, handler);
 
-      setSelectedTask((prev) =>
-        prev && prev._id === taskId
-          ? { ...prev, todos: [...(prev.todos || []), todo] }
-          : prev
-      );
+    const updateTasks = (taskId: string, updater: (task: SharedTask) => SharedTask) => {
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? updater(t) : t)));
+      setSelectedTask((prev) => (prev && prev._id === taskId ? updater(prev) : prev));
     };
 
-    const handleTodoUpdated = (updatedTodo: any) => {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === taskId
-            ? {
-                ...t,
-                todos: t.todos?.map((todo) =>
-                  todo._id === updatedTodo._id ? updatedTodo : todo
-                ),
-              }
-            : t
-        )
-      );
+    handleTodoEvent("todo_created", ({ todo, taskId }: { todo: any; taskId: string }) =>
+      updateTasks(taskId, (t) => ({ ...t, todos: [...(t.todos || []), todo] }))
+    );
 
-      setSelectedTask((prev) =>
-        prev && prev._id === taskId
-          ? {
-              ...prev,
-              todos: prev.todos?.map((todo) =>
-                todo._id === updatedTodo._id ? updatedTodo : todo
-              ),
-            }
-          : prev
-      );
-    };
+    handleTodoEvent("todo_updated", (updatedTodo: any) =>
+      updateTasks(taskId, (t) => ({
+        ...t,
+        todos: t.todos?.map((td) => (td._id === updatedTodo._id ? updatedTodo : td)),
+      }))
+    );
 
-    const handleTodoDeleted = ({ todoId }: { todoId: string }) => {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === taskId
-            ? { ...t, todos: t.todos?.filter((todo) => todo._id !== todoId) }
-            : t
-        )
-      );
+    handleTodoEvent("todo_deleted", ({ todoId }: { todoId: string }) =>
+      updateTasks(taskId, (t) => ({
+        ...t,
+        todos: t.todos?.filter((td) => td._id !== todoId),
+      }))
+    );
 
-      setSelectedTask((prev) =>
-        prev && prev._id === taskId
-          ? {
-              ...prev,
-              todos: prev.todos?.filter((todo) => todo._id !== todoId),
-            }
-          : prev
-      );
-    };
-
-    const handleTodoToggled = ({
-      todo,
-      taskStatus,
-    }: {
-      todo: any;
-      taskStatus: string;
-    }) => {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === taskId
-            ? {
-                ...t,
-                status: taskStatus,
-                todos: t.todos?.map((td) => (td._id === todo._id ? todo : td)),
-              } as SharedTask
-            : t
-        )
-      );
-
-      setSelectedTask((prev) =>
-        prev && prev._id === taskId
-          ? {
-              ...prev,
-              status: taskStatus,
-              todos: prev.todos?.map((td) =>
-                td._id === todo._id ? todo : td
-              ),
-            } as SharedTask
-          : prev
-      );
-    };
-
-    socket.on("todo_created", handleTodoCreated);
-    socket.on("todo_updated", handleTodoUpdated);
-    socket.on("todo_deleted", handleTodoDeleted);
-    socket.on("todo_toggled", handleTodoToggled);
+    handleTodoEvent("todo_toggled", ({ todo, taskStatus }: { todo: any; taskStatus: string }) =>
+      updateTasks(taskId, (t) => ({
+        ...t,
+        status: taskStatus,
+        todos: t.todos?.map((td) => (td._id === todo._id ? todo : td)),
+      }))
+    );
 
     return () => {
       socket.emit("leave_task", taskId);
-      socket.off("todo_created", handleTodoCreated);
-      socket.off("todo_updated", handleTodoUpdated);
-      socket.off("todo_deleted", handleTodoDeleted);
-      socket.off("todo_toggled", handleTodoToggled);
+      socket.removeAllListeners();
     };
   }, [selectedTask?._id]);
 
+  // Handlers
   const handleCopyLink = (link?: string) => {
-    if (!link) {
-      toast.error("No invite link available");
-      return;
-    }
+    if (!link) return toast.error("No invite link available");
     navigator.clipboard.writeText(link);
     toast.success("Invite link copied!");
   };
@@ -241,7 +192,6 @@ function SharedTasks() {
       );
 
       const { data: updatedTodo, taskStatus } = res.data;
-
       setTasks((prev) =>
         prev.map((t) =>
           t._id === taskId
@@ -254,18 +204,6 @@ function SharedTasks() {
               }
             : t
         )
-      );
-
-      setSelectedTask((prev) =>
-        prev && prev._id === taskId
-          ? {
-              ...prev,
-              status: taskStatus,
-              todos: prev.todos?.map((todo) =>
-                todo._id === updatedTodo._id ? updatedTodo : todo
-              ),
-            }
-          : prev
       );
     } catch (err) {
       console.error("Failed to toggle todo", err);
@@ -281,8 +219,7 @@ function SharedTasks() {
       setTasks((prev) => prev.filter((t) => t._id !== taskId));
       if (selectedTask?._id === taskId) setSelectedTask(null);
       toast.success("Task deleted!");
-    } catch (err) {
-      console.error("Failed to delete task", err);
+    } catch {
       toast.error("Failed to delete task");
     }
   };
@@ -297,8 +234,7 @@ function SharedTasks() {
       );
       toast.success("Collaboration disabled!");
       fetchSharedTasksAndTodos();
-    } catch (err) {
-      console.error("Failed to disable collaboration", err);
+    } catch {
       toast.error("Failed to disable collaboration");
     }
   };
@@ -317,21 +253,20 @@ function SharedTasks() {
     <div className="min-h-screen p-3 sm:p-6 bg-background">
       <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
+        {/* Mobile Header */}
         <div className="lg:hidden flex items-center justify-between mb-4 p-4 bg-card rounded-lg border border-border">
           <h1 className="text-lg font-bold text-foreground">Shared Tasks</h1>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-accent rounded-lg transition-colors"
           >
-            {sidebarOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
+        {/* Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 h-auto lg:h-[calc(100vh-100px)]">
+          {/* Sidebar */}
           <div
             className={`lg:col-span-4 ${
               sidebarOpen ? "block" : "hidden lg:block"
@@ -368,17 +303,15 @@ function SharedTasks() {
                         setSidebarOpen(false);
                       }}
                     >
-                      <div className="cursor-pointer">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-sm lg:text-base font-semibold text-card-foreground truncate flex-1 mr-2">
-                            {task.title}
-                          </h3>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-xs font-medium border ${STATUS_COLORS[task.status]}`}
-                          >
-                            {task.status}
-                          </span>
-                        </div>
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-sm lg:text-base font-semibold text-card-foreground truncate flex-1 mr-2">
+                          {task.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-xs font-medium border ${STATUS_COLORS[task.status]}`}
+                        >
+                          {task.status}
+                        </span>
                       </div>
 
                       {task.todos && task.todos.length > 0 && (
@@ -407,17 +340,11 @@ function SharedTasks() {
                           : `Created by ${task.ownerName}`}
                         <br />
                         Last updated: {formatDate(task.updatedAt)}
-                        <br />
-                        {task.collaborators.length === 0 ? (
-                          <span>Waiting for Collaborators</span>
-                        ) : (
-                          <span>
-                            Collaborators : {task.collaborators.length}
-                          </span>
-                        )}
+                        
+                        
                       </p>
 
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -426,6 +353,17 @@ function SharedTasks() {
                           className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20"
                         >
                           <Copy className="w-3 h-3" /> Copy Link
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTaskIdForModal(task._id);
+                            setOpenModal(true);
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border transition-colors bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500/20"
+                        >
+                          <Users className="w-3 h-3" /> View Collaborators
                         </button>
 
                         {task.created_by === user?.id && (
@@ -447,6 +385,7 @@ function SharedTasks() {
             </div>
           </div>
 
+          {/* Main Panel */}
           <div className="lg:col-span-8 bg-card rounded-lg border border-border p-4 lg:p-6 overflow-y-auto">
             <TaskDetails
               selectedTask={selectedTask}
@@ -468,6 +407,15 @@ function SharedTasks() {
           </div>
         </div>
       </div>
+
+      {/* Collaborators Modal */}
+      <CollaboratorsModal
+        open={openModal}
+        onOpenChange={setOpenModal}
+        taskId={selectedTaskIdForModal}
+        collaboratorList={collaboratorList}
+        baseUrl={BASEURL}
+      />
     </div>
   );
 }
