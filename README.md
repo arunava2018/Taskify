@@ -13,7 +13,9 @@
   <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb">
   <img alt="TailwindCSS" src="https://img.shields.io/badge/TailwindCSS-Styling-38BDF8?style=for-the-badge&logo=tailwindcss">
   <img alt="Clerk" src="https://img.shields.io/badge/Clerk-Authentication-3D3D3D?style=for-the-badge&logo=clerk">
+  <img alt="Socket.io" src="https://img.shields.io/badge/Socket.io-Realtime-010101?style=for-the-badge&logo=socket.io">
 </p>
+
 
 <p align="center">
   <a href="#-about-the-project"><strong>About</strong></a> ·
@@ -34,7 +36,7 @@
 
 <div align="center">
 
-**A modern, collaborative task management app designed for individuals and teams.**
+**A modern, real time collaborative task management app designed for individuals and teams.**
 
 </div>
 
@@ -42,7 +44,7 @@
 
 ## 🧠 About The Project
 
-**Taskify** is a **full-stack collaborative task management platform** designed to help users and teams stay productive, organized, and efficient.  
+**Taskify** is a **full-stack real time collaborative task management platform** designed to help users and teams stay productive, organized, and efficient.  
 It allows you to create, manage, and track tasks — either individually or collaboratively across users.
 
 From simple personal to-do lists to complex project workflows, **Taskify** provides a smooth, powerful, and intuitive SaaS experience.
