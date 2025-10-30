@@ -9,7 +9,7 @@ export default function SignInPage() {
   }
   return (
     <div className="flex items-center justify-center h-screen">
-      <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
+      <SignIn forceRedirectUrl="/dashboard" path="/sign-in" routing="path" signUpUrl="/sign-up" />
     </div>
   );
 }

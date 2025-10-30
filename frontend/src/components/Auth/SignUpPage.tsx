@@ -8,7 +8,7 @@ export default function SignUpPage() {
   }
   return (
     <div className="flex items-center justify-center mt-10">
-      <SignUp path="/sign-up" routing="path" signInUrl="/sign-in" />
+      <SignUp forceRedirectUrl="/dashboard" path="/sign-up" routing="path" signInUrl="/sign-in" />
     </div>
   );
 }
